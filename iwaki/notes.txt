@@ -1,0 +1,144 @@
+-- pure bindings within assignment or whilecondition are not allowed (except for "this" slot). In other words, all $-vars must be defined in preconditions ONLY!, not even in defaults.
+
+
+-- since all $-vars used in the recipe must be defined in preconditions, and since val arg is used to both keep the bound value and as an argument of a comparison predicate (which is fucked up), some slot names will have to be present more than once in precondition. E.g
+
+<name="time" var = "_im_time">  // as a pure binding and
+<name="time" val = "$last_time+10" rel=">" >  // as a comparison predicate
+
+-- it would make more sense to refer to the atom in assignment via
+
+<name="this" val="$this_user_atom"> 
+
+rather than 
+
+<name="this" var="this_user_atom">.
+
+In precondtions it does make sense the current:
+<name="this" var="this_user_atom">
+
+If we did so, then we wouldn't need to trea "this" specially when filling the value of "this" slot of an assignment atom. But for the sake of the legacy recipes we gonna keep this as it is.
+
+
+--TODO: since expression parser does not use globals anymore, the procedure to parse updated expressions for assignments, actions, and such should be:
+-update globals
+-update local pure bindings
+-eval expressions.
+
+-- unification is not between the preconditions and parent node, instead it's between the preconditions and root bindings. The connection with the parent node is done by pre-unification propagation of the child's goal bindings, that have already been bound according to the parent's bindings) to preconditions.
+
+
+
+-- back chaining: 
+
+- match goal with post condition. post condition's 'this' slot is bound.
+- create a copy of preconoditions. bind precondition's 'this' slots (locking).
+- try to unify preconditions that had some atoms locked with globals bindings.
+
+
+-- binding without a condition is done by using rel="bind". this is  to avoid ambiguity between 
+name="slot1" var="var1" 
+and
+name="slot1" rel="equal" val="_NO_VALUE_" var="var1".
+
+-- local binding is only used to dereference $-vars, including: (a) expression evaluation (uses actually local vals) and (b) dereferencing var of 'this' slot, for example to set up node's whileconditions and to perform assignments. 
+
+-- chain of binding whilecondition:
+1. copy whilecondition from recipe to node, while instantiating "this" slot values according to vars and node bindings. All atoms in whilecondition should have bound "this" slot vals.
+2. when checking whileconditions just unify them with global atoms, using node's bindings. We do not create new bindings in whilecondition, so special unifyWithoutBinding is used. 
+
+-- handling removed atoms: a lot to be done, like actually removing global bindings. for now, if local binding update does not find a global binding atom, local binding 'this' value becomes _DEFUNCT_.
+
+
+old unification in formula.
+
+		for(list<Atom>::iterator atom1=con1->atoms.begin(); \
+			atom1!=con1->atoms.end(); atom1++) {
+			//cout << "Trying to match atom1: " << endl;
+			//atom1->print();
+			bool atom1_matched = false;
+			Atom atom1_bindings;
+			/** iterate through atoms2 */
+			for(list<Atom>::iterator atom2=con2.atoms.begin(); \
+				atom2!=con2.atoms.end(); atom2++) {
+				//cout << "and atom2: " << endl;
+				//atom2->print();
+				if (atom1->unify((*atom2), atom1_bindings)) {
+					atom1_matched = true;
+					break;
+					}
+				}
+			if (atom1_matched) {
+				/** append atom1_bindings to conj1_bindings */
+				conj1_bindings.atoms.push_back(atom1_bindings);
+				//cout << "Atom match succeeded" << endl;
+				} 
+			else {
+				all_atoms1_matched = false;
+				//cout << "Atom match failed" << endl;
+				break;
+				}
+			}
+		if (all_atoms1_matched) {
+			res = true;
+			/** until first conjunction (disjunct) matches */
+			new_bindings = conj1_bindings;
+			break;
+			}
+		else {
+			res = false;
+			}
+		}
+
+
+
+
+
+    
+
+        /*
+         * lock bmapping based on 'this'
+         */
+    std::vector<Atom>::size_type i=0;
+
+    for(vector<Atom>::iterator atom1=con1.atoms.begin();  \
+        atom1!=con1.atoms.end(); atom1++) {
+        Match aMatch;
+        aMatch.id1 = i;
+        string this_val1 = atom1->readSlotVal("this");
+        
+        if (this_val1 == "_NOT_FOUND_") {
+            FILE_LOG(logERROR) << "\
+Error: 'this' slot not found in the following atom: ";
+            atom1->print();
+        } else if ((this_val1 == "") || (this_val1 == "_NO_VALUE_")) {
+                /* unlocked atom */
+            aMatch.match_type = Unlocked;
+        } else {
+        
+                /* 'this' val is meaningful, find matching atom in con2*/
+            std::vector<Atom>::size_type j=0;
+            for(vector<Atom>::iterator atom2=con2.atoms.begin();  \
+                atom2!=con2.atoms.end(); atom2++) {
+                if (atom2->readSlotVal("this") == this_val1) {
+                        /* found matching atom in con2*/
+                    break;
+                }
+                j++;
+            }
+            if (j >= con2.atoms.size()) {
+                    /* matching atom not found in con2 */
+                FILE_LOG(logERROR) << "\
+Error: not found matching atom for the following atom: ";
+                atom1->print();
+            } else {
+                aMatch.match_type = Locked;
+                aMatch.id2 = j;
+            }
+        }
+
+            /* got aMatch object, insert into mapping */
+        this->mapping.insert(
+            pair<std::vector<Atom>::size_type, Match>(i, aMatch) );
+        i++;
+    }

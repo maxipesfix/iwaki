@@ -77,7 +77,7 @@ class TimeYSegment {
   public:
     TimeYPair left;
     TimeYPair right;
-
+/* IF USING BOOST SERIALIZATION FOR IPC
   private:
     friend class boost::serialization::access;
     template<class Archive>
@@ -86,6 +86,7 @@ class TimeYSegment {
       ar & left;
       ar & right;
     }
+*/
 };
 
 class TimeYSegmentRes : public TimeYSegment {
@@ -95,6 +96,7 @@ class TimeYSegmentRes : public TimeYSegment {
   public:
     bool preemptive; /* can be withdrawn from the task and used by someone else */
     std::string task_id;
+    /* IF USING BOOST SERIALIZATION FOR IPC
   private:
     friend class boost::serialization::access;
     template<class Archive>
@@ -104,6 +106,7 @@ class TimeYSegmentRes : public TimeYSegment {
       ar & preemptive;
       ar & task_id;
     }
+    */
 };
 
 /*
@@ -130,6 +133,7 @@ class ResourceProfile {
     std::list<TimeYSegmentRes>::iterator getSegmentContainingTime(unsigned long tpoint);
   public:
     std::list<TimeYSegmentRes> profile;
+    /* IF USING BOOST SERIALIZATION FOR IPC
   private:
     friend class boost::serialization::access;
     template<class Archive>
@@ -137,6 +141,7 @@ class ResourceProfile {
     {
       ar & profile;
     }
+    */
 };
 
 
@@ -174,17 +179,18 @@ class Task {
   public:
     int dispatch();
 
+    /* IF USING BOOST SERIALIZATION FOR IPC
   private:
     friend class boost::serialization::access;
     template<class Archive>
         void serialize(Archive & ar, const unsigned int version)
     {
-            // ar & boost::serialization::base_object<std::map<std::string, ResourceProfile> > profiles;
         ar & profiles;
         ar & name;
         ar & requester;
         ar & id;
     }
+    */
 };
 
  /* This defines the partial(?) order on tasks*/
@@ -224,6 +230,7 @@ class ArgSlot {
     std::string unit;
     std::string var; /* used to reference $-var in return_args of an action */
 
+        /* IF USING BOOST SERIALIZATION FOR IPC
   private:
     friend class boost::serialization::access;
     template<class Archive>
@@ -236,6 +243,7 @@ class ArgSlot {
       ar & unit;
       ar & var;
     }
+        */
 };
 
 class Args : public std::list<ArgSlot> {
@@ -249,7 +257,8 @@ class Args : public std::list<ArgSlot> {
     bool trySetArgByName(std::string arg_name, std::string arg_val);
     void print();
     void print(TLogLevel log_level);
-
+    
+    /* IF USING BOOST SERIALIZATION FOR IPC
   private:
     friend class boost::serialization::access;
     template<class Archive>
@@ -257,6 +266,7 @@ class Args : public std::list<ArgSlot> {
     {
         ar & boost::serialization::base_object< std::list<ArgSlot> >(*this);
     }
+    */
 };
 
 
@@ -271,6 +281,7 @@ class Datablock : public std::map<std::string, std::string> {
     void print();
     void print(TLogLevel log_level);
 
+        /* IF USING BOOST SERIALIZATION FOR IPC
   private:
     friend class boost::serialization::access;
     template<class Archive>
@@ -278,6 +289,7 @@ class Datablock : public std::map<std::string, std::string> {
     {
         ar & boost::serialization::base_object< std::map<std::string, std::string> >(*this);
     }
+        */
 };
 
 
@@ -291,6 +303,7 @@ class Datablocks : public std::list<Datablock> {
     void print();
     void print(TLogLevel log_level);
 
+        /* IF USING BOOST SERIALIZATION FOR IPC
   private:
     friend class boost::serialization::access;
     template<class Archive>
@@ -298,6 +311,7 @@ class Datablocks : public std::list<Datablock> {
     {
         ar & boost::serialization::base_object< std::list<Datablock> >(*this);
     }
+        */
 };
 
 
@@ -335,6 +349,7 @@ class Action{
          * including the resource profile-like representations like segments
          * and constraints */
 
+        /* IF USING BOOST SERIALIZATION FOR IPC
   private:
     friend class boost::serialization::access;
     template<class Archive>
@@ -351,6 +366,7 @@ class Action{
         ar & timeout;
         ar & task;
     }
+        */
 };
 
 
@@ -369,6 +385,7 @@ class ActionStatus {
     std::string executor;
     Args return_args;
 
+        /* IF USING BOOST SERIALIZATION FOR IPC
   private:
     friend class boost::serialization::access;
     template<class Archive>
@@ -379,6 +396,7 @@ class ActionStatus {
       ar & executor;
       ar & return_args;
     }
+        */
 };
 
 

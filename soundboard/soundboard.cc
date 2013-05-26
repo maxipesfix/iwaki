@@ -48,12 +48,11 @@ TextUI textUI;
 
 void dispatchActionsFromOutputQueue() {
 
-    BoostBBEntry<Action> bbAction(ACTION_DISPATCH_BB_VAR, Poll_Mode);
     std::list<Action>::iterator action_it = im.output_queue.begin();
 
     FILE_LOG(logDEBUG4) << "Action queue has length: " << im.output_queue.size();
     while( action_it != im.output_queue.end() ) {
-        bbAction = *action_it;
+            /* TODO: here we dispatch the action from the queue */
         action_it++;
         im.output_queue.pop_front();
     }
@@ -218,9 +217,6 @@ Usage: imcore [OPTION]... \n\
 
     FILELog::ReportingLevel() = FILELog::FromString(debug_level.empty() ? "DEBUG1" : debug_level);
 
-        /* connect to IPC */
-    IPC_connect("imcore");
-
 
         /* set IM params */
     im.timer_period_microsec = timer_period_microsec;
@@ -233,69 +229,15 @@ Usage: imcore [OPTION]... \n\
     }
         //im.printRecipes();
         //im.printTriggerables();
-    IPC_listenClear(0);
-    
-    FILE_LOG(logINFO) << "Executed IPC_listenClear(0).";
 
         /* initialize text UI */
     if ( text_ui ) {
         textUI.init();
     }
 
-    BoostBBEntry<ActionStatus> bbActionCompletionStatus(ACTION_STATUS_BB_VAR, Stream_Mode,
-                                              hndActionCompletionStatus);
-    blackboardEntry<SemParseStruct> \
-        semParseStruct_consumer("SemParseConsole1", \
-                                "{string, string, string, double, int, int}", \
-                                Stream_Mode, hndSemParse);
-
-
-    blackboardEntry<KeyboardMessage> scrabbleKboardMessage(KEYBOARD_MESSAGE_BB,
-         KEYBOARD_MESSAGE_FMT, Stream_Mode, scrabbleKboardMessageHandler);
-    
-    blackboardEntry<int> bbTick(TICK_BB_VAR, TICK_FORMAT, Stream_Mode, hndTick);
-    BoostBBEntry<BB_USER_RECORD_TYPE> bbUser(BB_USER_RECORD, Stream_Mode, hndUserRecord);
-    BoostBBEntry<IdentityMap> bbIdentityMap(IDENTITY_MAP_VAR_NAME, Stream_Mode, hndIdentityMap);
-
-
-        /* big_brother/telescreen blackboard vars */
-        /* SCRABBLE */
-    BoostBBEntry<GameState> bbGameState(GAME_STATE_VAR_NAME, Stream_Mode, hndGameState);
-    
-    BoostBBEntry<PlayerAction> bbPlayerActionRobot(ROBOT_ACTION_VAR_NAME, Stream_Mode, hndPlayerAction);
-    BoostBBEntry<PlayerAction> bbPlayerActionRight(RIGHT_ACTION_VAR_NAME, Stream_Mode, hndPlayerAction);
-    BoostBBEntry<PlayerAction> bbPlayerActionCenter(CENTER_ACTION_VAR_NAME, Stream_Mode, hndPlayerAction);
-    BoostBBEntry<PlayerAction> bbPlayerActionLeft(LEFT_ACTION_VAR_NAME, Stream_Mode, hndPlayerAction);
-
-    BoostBBEntry<PlayerTurnResult> bbPlayerTurnRobot(ROBOT_TURN_VAR_NAME, Stream_Mode, hndPlayerTurn);
-    BoostBBEntry<PlayerTurnResult> bbPlayerTurnRight(RIGHT_TURN_VAR_NAME, Stream_Mode, hndPlayerTurn);
-    BoostBBEntry<PlayerTurnResult> bbPlayerTurnCenter(CENTER_TURN_VAR_NAME, Stream_Mode, hndPlayerTurn); 
-    BoostBBEntry<PlayerTurnResult> bbPlayerTurnLeft(LEFT_TURN_VAR_NAME, Stream_Mode, hndPlayerTurn);
-
-    BoostBBEntry<PlayerGameStats> bbPlayerGameRobot(ROBOT_GAME_STATS_VAR_NAME, Stream_Mode, hndPlayerGame);
-    BoostBBEntry<PlayerGameStats> bbPlayerGameRight(RIGHT_GAME_STATS_VAR_NAME, Stream_Mode, hndPlayerGame);
-    BoostBBEntry<PlayerGameStats> bbPlayerGameCenter(CENTER_GAME_STATS_VAR_NAME, Stream_Mode, hndPlayerGame);
-    BoostBBEntry<PlayerGameStats> bbPlayerGameLeft(LEFT_GAME_STATS_VAR_NAME, Stream_Mode, hndPlayerGame);
-
-    BoostBBEntry<LifetimeStatisticsMap> bbLifetimeStats(PLAYER_LIFETIME_STATS_MAP_VAR_NAME, Stream_Mode, hndLifetimeStats);
-
-    BoostBBEntry<BestMoves> bbBestMoves(BEST_MOVES_VAR_NAME, Stream_Mode, hndBestMoves);
-    
-    FILE_LOG(logINFO) << "Finished registering IPC variables.";
-        /**DOIF: someome will be updating the IM state*/
-        //BoostIpc::subscribe( "imstate", hndImState, NULL );
-
-    FILE_LOG(logINFO) << "Connected to central.";
-        /* added for loopy version */
-        //if (timer_on) {
-            //runListenThread();
-        //}
-    FILE_LOG(logINFO) << "Executed runListenThread.";
-    
         //for loopy version commented out
     if (!timer_on) {
-        FILE_LOG(logINFO) << "Timer off: executing IPCdispatch.";
-        IPC_dispatch();
+        FILE_LOG(logINFO) << "Timer off: not implemented.";
     } else {
         FILE_LOG(logINFO) << "Running timer with the period of " <<
             timer_period_microsec << " microseconds." << endl;
@@ -305,11 +247,6 @@ Usage: imcore [OPTION]... \n\
                 "############ Re-entering the main loop at: " << setprecision(20) <<
                 start_tick ;
             
-            FILE_LOG(logDEBUG4) <<
-                "############ Clearing IPC buffer...";
-            IPC_listenClear(0);
-            FILE_LOG(logDEBUG4) <<
-                "############ Finished clearing IPC buffer.";
             im.doTick();
 
                 /* Dispatch actions collected at the output queue */
@@ -320,7 +257,6 @@ Usage: imcore [OPTION]... \n\
                 if ( ui_command == uiQuit) {
                     textUI.close();
                     FILE_LOG(logINFO) << "TextUI requested quit. Goodbye.";
-                    IPC_disconnect();
                     return -1;
                 }
             }
@@ -385,5 +321,4 @@ Usage: imcore [OPTION]... \n\
             }
         }
     }
-    IPC_disconnect();
 }

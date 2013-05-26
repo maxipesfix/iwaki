@@ -1,34 +1,29 @@
 /*****************************************************************************
- * PROJECT: Interaction Manager
+ * PROJECT: Iwaki Interaction Manager
  *
- * (c) Copyright 2009, 2010, 2011 Maxim Makatchev. All rights reserved.
+ * (c) Copyright 2009-2013 Maxim Makatchev, Reid Simmons,
+ * Carnegie Mellon University. All rights reserved.
  *
- * FILE: gim.cc
+ * FILE: soundboard.cc
  *
- * ABSTRACT: Interaction manager core: stack and other data structures
+ * ABSTRACT: an example use of the library. This is a simple application
+ * that takes terminal input and plays sound files according to the recipes.
  *
  ****************************************************************/
 
-#ifndef GIM_H
-#define GIM_H
+#ifndef SOUNDBOARD_H
+#define SOUNDBOARD_H
 
-#include "console.h"
 #include "iwaki.h"
 #include <iostream>
 #include <deque>
 
-#include "BoostIpc.h"
-#include "BoostBBEntry.h"
-#include "bufferIPC.h"
 
 /* if uncommented, the action is considered completed right
  * after it is dispatched. When using true executive modules,
  * comment this define out.
  * */
 #define NO_EXEC
-
-#define IMCORE_NAME "imcore"
-#define QUEUE_NAME "queue"
 
 #define TICK_BB_VAR "tick"
 #define TICK_FORMAT "int"
@@ -54,7 +49,6 @@
 #define MAX_UI_TICK_ID 100000
 
 #define ABORT_ACTION_NAME "abort_action"
-
 
 enum UICommand {uiQuit, uiNone};
 enum VerbosityLevel {Brief, Verbose, WithBodyElements};
@@ -91,20 +85,5 @@ class TextUI{
     int tick_id;
 };
 
-
-/* doman specific inputs */
-void hndUserRecord(blackboardEntry<BoostIpc::BoostIpcData> &bbEntry);
-void hndActionCompletionStatus(blackboardEntry<BoostIpc::BoostIpcData> &bbEntry);
-void hndTick(blackboardEntry<int> &tick);
-void hndSemParse(blackboardEntry<SemParseStruct> &sem_parse_ref);
-void scrabbleKboardMessageHandler(blackboardEntry<KeyboardMessage> &msg);
-void hndIdentityMap(blackboardEntry<BoostIpc::BoostIpcData> &bbEntry);
-/* SCRABBLE */
-void hndGameState(blackboardEntry<BoostIpc::BoostIpcData> &bbEntry);
-void hndPlayerAction(blackboardEntry<BoostIpc::BoostIpcData> &bbEntry);
-void hndPlayerTurn(blackboardEntry<BoostIpc::BoostIpcData> &bbEntry);
-void hndPlayerGame(blackboardEntry<BoostIpc::BoostIpcData> &bbEntry);
-void hndLifetimeStats(blackboardEntry<BoostIpc::BoostIpcData> &bbEntry);
-void hndBestMoves(blackboardEntry<BoostIpc::BoostIpcData> &bbEntry);
 
 #endif // GIM_H

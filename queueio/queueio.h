@@ -30,21 +30,12 @@ ResourceProfile, Task and related classes for interfacing with the queue.
 #include <map>
 #include <list>
 
+// IF USING BOOST SERIALIZATION FOR IPC
+//   #include <boost/serialization/base_object.hpp>
+//   #include <boost/serialization/utility.hpp> 
+//   #include <boost/serialization/list.hpp>
+//   #include <boost/serialization/string.hpp>
 
-#include <boost/serialization/base_object.hpp> // May not need this.
-#include <boost/serialization/utility.hpp> // Serialize pair.
-#include <boost/serialization/list.hpp>
-#include <boost/serialization/string.hpp>
-
-
-/* moved to imcore.h 
-   #define ACTION_DISPATCH_BB_VAR "action_dispatch"
-   #define ACTION_STATUS_BB_VAR "action_status"
-
-   #define ACTION_TIMING_BB_VAR "action_timing"
-   #define ACTION_TIMING_RESPONSE_BB_VAR "action_timing_response"
-   #define ACTION_TIMING_RESPONSE_FORMAT "{int, float}"
-*/
 
 #define DEFAULT_ACTION_TIMEOUT -1.0
 #define DEFAULT_ACTION_PRIORITY "0"

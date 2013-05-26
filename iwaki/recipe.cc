@@ -12,21 +12,17 @@
 
 #include <iostream>
 #include <sstream>
-#include "blackboard.h"
 #include "iwaki.h"
 #include "exparser.h"
 #include "log.h"
 #include <string>
-//#include <Python.h>
 #include <csignal>
 
 #include <sys/time.h>
 #include <unistd.h>
 
 #include <math.h>
-#ifndef M_PI
-#define M_PI 3.14159
-#endif
+
 
 //using namespace std;
 using std::string;

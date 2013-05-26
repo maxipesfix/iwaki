@@ -151,6 +151,8 @@ class Formula {
   public:
         // default constructor
     Formula() {}
+
+  public:
     bool load(TiXmlElement* pElem);
     void print();
     void print(TLogLevel log_level);
@@ -588,4 +590,4 @@ class InteractionManager{
     double timer_period_microsec;
 };
 
-#endif // IMCORE_H
+#endif // IWAKI_H

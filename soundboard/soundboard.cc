@@ -9,7 +9,7 @@
  * ABSTRACT: an example use of the Iwaki library. This is a simple application
  * that takes terminal input and plays sound files according to the recipes.
  *
- * SAMPLE COMMAND LINE: ./soundboard/soundboard -t 0.5 -d DEBUG4 -l log1
+ * SAMPLE COMMAND LINE: ./soundboard/soundboard -t 0.1 -d DEBUG4 -l log1
  *                       -p ~/h/im/scripts -i initialize_im.georgi.xml -x
  * 
  ****************************************************************/
@@ -21,7 +21,7 @@
 #include <string>
 #include <csignal>
 #include <algorithm>
-
+#include <ncursesw/ncurses.h> /* for getch() */
 
 #include <sys/time.h>
 #include <stdio.h>
@@ -44,8 +44,7 @@ using std::iostream;
 InteractionManager im;
 TextUI textUI;
 
-
-
+#define KB_ENTER int('\n')
 
 /*
  * Process the output Action queue.
@@ -84,6 +83,22 @@ void hndActionCompletionStatus(ActionStatus &astat) {
 }
 
 
+void updateKbBuffer(string &kb_buffer, int ch) {
+    char buffer[8];
+    sprintf (buffer, "%c", ch);
+    if ((ch >= 32) && (ch <= 126)) {
+            /* legal visible characters */
+        kb_buffer += string(buffer);
+    } else if (ch == KEY_BACKSPACE) {
+            /* apparently this symbol is already defined */
+        if (!kb_buffer.empty()) {
+            kb_buffer = kb_buffer.substr(0, kb_buffer.size() - 1);
+        }
+    } else if (ch == KB_ENTER) {
+        kb_buffer = "";
+    }
+}
+
 
 int main (int argc, char **argv)
 {       /* parse argument line */
@@ -95,6 +110,8 @@ int main (int argc, char **argv)
     unsigned int timer_period_microsec = 1000000;
     int c;
     UICommand ui_command;
+    int ch;             /* char for runtime keyboard input */
+    string kb_buffer;   /* the keyboard buffer master copy */
 
     while (1)
     {
@@ -279,16 +296,27 @@ Usage: imcore [OPTION]... \n\
         
             /* Dispatch actions collected at the output queue */
         dispatchActionsFromOutputQueue();
+
         
+            /* Process keyboard input */
+        ch = getch();
+
+        updateKbBuffer(kb_buffer, ch);
             /* if running with text_ui, do the terminal screen update */
         if (text_ui) {
-            ui_command =  textUI.update(im);
+                /* pass kb_buffer to textUI for printing */
+            textUI.keyboardBuffer = kb_buffer;  
+            ui_command =  textUI.update(im, ch);
             if ( ui_command == uiQuit) {
                 textUI.close();
                 FILE_LOG(logINFO) << "TextUI requested quit. Goodbye.";
                 return -1;
             }
         }
+
+            /*
+             * Logging
+             * */
         
             /* check if need to swap log file */
         FILE* pStream = Output2FILE::Stream();
@@ -348,6 +376,10 @@ Usage: imcore [OPTION]... \n\
             im.ptree.print(logWARNING);
             im.getGlobalBindings()->print(logWARNING);
         }
+
+            /*
+             * End logging
+             * */
     }
         /*********
          * End of main loop

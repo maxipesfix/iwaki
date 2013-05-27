@@ -21,14 +21,16 @@
 
 #define KEY_SMALL_Q 113
 #define KEY_SMALL_V 118
+#define KEY_CONTROL_SMALL_Q 17
+#define KEY_CONTROL_SMALL_V 22
 #define MAX_NODE_WIDTH 20
 #define ROOT_NODE_WIDTH 4
 
 
-UICommand TextUI::update(InteractionManager &im) {
-    int ch;
+UICommand TextUI::update(InteractionManager &im, int ch) {
     UICommand ui_command = uiNone;
     int nrow, ncol, msg_height, tree_height, globals_height = 1, header_height = 2;
+    int keyboard_buffer_height = 1;
 
 
         /*
@@ -41,7 +43,8 @@ UICommand TextUI::update(InteractionManager &im) {
     } else {
         msg_height = this->msgPaneHeight;
     }
-    tree_height = nrow - header_height - msg_height - globals_height;
+    tree_height = nrow - header_height - msg_height - globals_height -
+        keyboard_buffer_height;
 
 
         /*
@@ -60,19 +63,22 @@ UICommand TextUI::update(InteractionManager &im) {
 
     move(header_height + tree_height + globals_height, 0);
     this->printMessages(msg_height);
-    
+
+    move(header_height + tree_height + globals_height + msg_height, 0);
+    this->printKeyboardBuffer();
 
         /*
          * read user input
-         */
-    ch = getch();		/* If raw() hadn't been called
+         * (do it outside) of TextUI::update
+         * 
+         ch = getch();	*/	/* If raw() hadn't been called
                                  * we have to press enter before it
 				 * gets to the program 		*/
     
-    if ( ch == KEY_SMALL_Q ) {
+    if ( ch == KEY_CONTROL_SMALL_Q ) {
         printw("Goodbye");
         ui_command = uiQuit;
-    } else if ( ch == KEY_SMALL_V ) {  /* toggle verbose mode */
+    } else if ( ch == KEY_CONTROL_SMALL_V ) {  /* toggle verbose mode */
         move(1,0);
         if (this->verbosity == WithBodyElements) {
             printw("brief");
@@ -204,7 +210,7 @@ void TextUI::printPlanTree(PlanTree &ptree, const int &tree_height) {
 }
 
 void TextUI::printHeader() {
-    string header = "[v]erbose/brief [q]uit [h]elp";
+    string header = "[ctrl-v]erbose/brief [ctrl-q]uit [ctrl-h]elp";
     printw( header.c_str() );
 }
 
@@ -222,6 +228,11 @@ void TextUI::printMessages(const int &msg_height) {
         --dy;
     }
 }
+
+void TextUI::printKeyboardBuffer() {
+    printw( this->keyboardBuffer.c_str() );
+}
+
 
 void TextUI::push_msg(const string &msg) {
     if (this->messages.size() >= MAX_UI_MSGS) {

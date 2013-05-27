@@ -60,13 +60,15 @@ class TextUI{
   public:
         // default constructor
     TextUI(): verbosity(Brief), msgPaneHeight(5), minTreeHeight(3), tick_id(0) { }
-    
-    UICommand update(InteractionManager &im);
+
+  public:
+    UICommand update(InteractionManager &im, int ch);
     void init();
     void close();
     void printPlanTree(PlanTree &tr, const int &tree_height);
     void printHeader();
     void printMessages(const int &msg_height);
+    void printKeyboardBuffer();
     void push_msg(const string &msg);
     void processBodyElementDescriptions();
     void setBodyElementDescriptions(Node &aNode);
@@ -83,6 +85,7 @@ class TextUI{
     int minTreeHeight;
     std::list< string > messages;
     int tick_id;
+    string keyboardBuffer;
 };
 
 

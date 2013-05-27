@@ -57,12 +57,22 @@ void dispatchActionsFromOutputQueue() {
     FILE_LOG(logDEBUG4) << "Action queue has length: " <<
         im.output_queue.size();
     while( action_it != im.output_queue.end() ) {
-            /* here we dispatch the action from the queue.
-             * If action can take a long time the next two steps
+            /* hndAction:
+             * here we dispatch the action from the queue.
+             * Generally, since an action can take time longer than allowed
+             * for the tick of the main loop,
+             * hndAction and hndActionCompletionStatus
              * should be done asynchronously from this process. */
         ActionStatus astat;
         hndAction(*action_it, astat);
-            /* and here we pass the action completion status to the IM */
+            /* hndActionCompletionStatus:
+             * here we pass the action completion status to the IM. We
+             * do this synchroneously because in our example hndAction takes very
+             * short time (it creates a new gstreamer process) and the ActionStatus
+             * is returned right away, before the gstreamer finishes
+             * playing the sound. Generally,
+             * hndActionCompletionStatus should be called whenever an
+             * asychnroneous ActionStatus signal arrives . */
         hndActionCompletionStatus(astat);
         
         action_it++;
@@ -82,6 +92,46 @@ void hndActionCompletionStatus(ActionStatus &astat) {
     im.ptree.print(logDEBUG3);	
 }
 
+/*
+ * handle user input
+ * */
+void hndUserInput(string &utterance) {
+    FILE_LOG(logINFO) << "INFO: received user utterance: " + utterance;
+    textUI.push_msg("INFO: received user utterance: " + utterance);
+
+    Atom new_atom;
+    VarSlot v1, v2, v3, v4, v5, v6;
+
+    v1.name = "type";
+    v1.val = "im";
+    v1.unique_mask = true;
+	
+    v2.name = "subtype";
+    v2.val = "user";
+    v2.unique_mask = true;
+	
+    v3.name = "uu_unhandled";
+    v3.val = "true";
+
+    v4.name = "uu_string";
+    v4.val = utterance;
+
+    v5.name = "uu_timestamp";
+    v5.val = to_string((double)getSystemTimeMSec()/1000.0);
+
+    v6.name = "id";
+    v6.val = "1";
+
+
+    new_atom.varslots.push_back(v1);
+    new_atom.varslots.push_back(v2);
+    new_atom.varslots.push_back(v3);
+    new_atom.varslots.push_back(v4);
+    new_atom.varslots.push_back(v5);
+    new_atom.varslots.push_back(v6);
+    
+    im.input_queue.push_back(new_atom);
+}
 
 void updateKbBuffer(string &kb_buffer, int ch) {
     char buffer[8];
@@ -95,9 +145,14 @@ void updateKbBuffer(string &kb_buffer, int ch) {
             kb_buffer = kb_buffer.substr(0, kb_buffer.size() - 1);
         }
     } else if (ch == KB_ENTER) {
+
+            /* hndUserInput */
+        hndUserInput(kb_buffer);
         kb_buffer = "";
     }
 }
+
+
 
 
 int main (int argc, char **argv)

@@ -607,14 +607,14 @@ string Atom::readVarVal(string var_name) {
 void Atom::updateAtomValsOnly(Atom &atom2) {
 	for(list<VarSlot>::iterator a_varslot2 = atom2.varslots.begin();\
 		a_varslot2 != atom2.varslots.end(); a_varslot2++) {
-		bool found_slot = false;
+		//bool found_slot = false;
 		for(list<VarSlot>::iterator a_varslot1 = this->varslots.begin();\
 		a_varslot1 != this->varslots.end(); a_varslot1++) {
 			if (a_varslot1->name == a_varslot2->name) {
 				a_varslot1->val = a_varslot2->val;
                                     /* do not allow rewriting types */
                                     //a_varslot1->type = a_varslot2->type;
-				found_slot = true;
+                                    //	found_slot = true;
 				break;
 				}
 			}

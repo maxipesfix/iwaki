@@ -86,4 +86,11 @@ class TextUI{
 };
 
 
+/* action executor's function: in this case, a sound generator */
+bool executeAction(Action &an_action);
+void hndAction(Action &an_action, ActionStatus &astat);
+
+/* Action completion status handler */
+void hndActionCompletionStatus(ActionStatus &astat);
+
 #endif // GIM_H

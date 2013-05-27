@@ -6,9 +6,12 @@
  *
  * FILE: soundboard.cc
  *
- * ABSTRACT: an example use of the library. This is a simple application
+ * ABSTRACT: an example use of the Iwaki library. This is a simple application
  * that takes terminal input and plays sound files according to the recipes.
  *
+ * SAMPLE COMMAND LINE: ./soundboard/soundboard -t 0.5 -d DEBUG4 -l log1
+ *                       -p ~/h/im/scripts -i initialize_im.georgi.xml -x
+ * 
  ****************************************************************/
 
 #include <iostream>
@@ -42,6 +45,8 @@ InteractionManager im;
 TextUI textUI;
 
 
+
+
 /*
  * Process the output Action queue.
  * */
@@ -50,13 +55,34 @@ void dispatchActionsFromOutputQueue() {
 
     std::list<Action>::iterator action_it = im.output_queue.begin();
 
-    FILE_LOG(logDEBUG4) << "Action queue has length: " << im.output_queue.size();
+    FILE_LOG(logDEBUG4) << "Action queue has length: " <<
+        im.output_queue.size();
     while( action_it != im.output_queue.end() ) {
-            /* TODO: here we dispatch the action from the queue */
+            /* here we dispatch the action from the queue.
+             * If action can take a long time the next two steps
+             * should be done asynchronously from this process. */
+        ActionStatus astat;
+        hndAction(*action_it, astat);
+            /* and here we pass the action completion status to the IM */
+        hndActionCompletionStatus(astat);
+        
         action_it++;
         im.output_queue.pop_front();
     }
 }
+
+/*
+ * handle action completion status
+ * */
+void hndActionCompletionStatus(ActionStatus &astat) {
+
+    FILE_LOG(logDEBUG3) << "IM received action completion status: ";
+    astat.print(logDEBUG3);
+
+    im.processActionCompletionStatus(astat);
+    im.ptree.print(logDEBUG3);	
+}
+
 
 
 int main (int argc, char **argv)
@@ -64,7 +90,6 @@ int main (int argc, char **argv)
     opterr = 0;
     char* cvalue;
     std::string logfile_name;
-    bool timer_on = false;
     bool text_ui = false;
     std::string debug_level;
     unsigned int timer_period_microsec = 1000000;
@@ -178,8 +203,8 @@ Usage: imcore [OPTION]... \n\
                     than 1.0 seconds." << endl;
                  return -1;
                 }
-                timer_period_microsec = (unsigned int) floor(timer_period_sec*1000000);
-                timer_on = true;
+                timer_period_microsec =
+                    (unsigned int) floor(timer_period_sec*1000000);
                 break;
             }
             case 'i':
@@ -201,7 +226,8 @@ Usage: imcore [OPTION]... \n\
                 break;
             }
             default:
-                 cout << "Unknown option. Try 'imcore --help' for more information.\n";
+                 cout <<
+                     "Unknown option. Try 'soundboard --help' for more information.\n";
                  return -1;
         }
     }
@@ -215,7 +241,8 @@ Usage: imcore [OPTION]... \n\
         putchar ('\n');
     }
 
-    FILELog::ReportingLevel() = FILELog::FromString(debug_level.empty() ? "DEBUG1" : debug_level);
+    FILELog::ReportingLevel() =
+        FILELog::FromString(debug_level.empty() ? "DEBUG1" : debug_level);
 
 
         /* set IM params */
@@ -235,90 +262,95 @@ Usage: imcore [OPTION]... \n\
         textUI.init();
     }
 
-        //for loopy version commented out
-    if (!timer_on) {
-        FILE_LOG(logINFO) << "Timer off: not implemented.";
-    } else {
-        FILE_LOG(logINFO) << "Running timer with the period of " <<
-            timer_period_microsec << " microseconds." << endl;
-        while (1) {
-            double start_tick = getSystemTimeMSec()/1000.0;
-            FILE_LOG(logDEBUG4) <<
-                "############ Re-entering the main loop at: " << setprecision(20) <<
-                start_tick ;
-            
-            im.doTick();
-
-                /* Dispatch actions collected at the output queue */
-            dispatchActionsFromOutputQueue();
-            
-            if (text_ui) {
-                ui_command =  textUI.update(im);
-                if ( ui_command == uiQuit) {
-                    textUI.close();
-                    FILE_LOG(logINFO) << "TextUI requested quit. Goodbye.";
-                    return -1;
-                }
-            }
-
-                                                        /* check if need to swap log file */
-            FILE* pStream = Output2FILE::Stream();
-                // fseek( pStream, 0, SEEK_END );
-            int logfile_size = ftell( pStream );
-            FILE_LOG(logDEBUG3) << "Logfile size: " << logfile_size;
-            if (logfile_size > MAX_LOGFILE_SIZE ) {
-                    /* move on to a new logfile */
-                if (!setLogFile(logfile_name)) {
-                    return -1;
-                }
-            }
-            
-            double end_tick = getSystemTimeMSec()/1000.0;
-
-            FILE_LOG(logDEBUG4) <<
-                "############ Done tick at: " << setprecision(20) <<
-                end_tick ;
-            
-            FILE_LOG(logDEBUG4) <<
-                "############ Cycle took: " << setprecision(20) <<
-                (end_tick - start_tick) << " seconds.";
-
-                /** print sybcycle timings **/
-            if (im.timing_dump_counter == 0) {
-                FILE_LOG(logINFO) << "Print subcycle timings...";
-                for (std::map<string, std::list<double> >::const_iterator
-                         map_it = im.subcycle_timings.begin();
-                     map_it != im.subcycle_timings.end(); map_it++) {
-                    string timings_str;
-
-                    for (std::list<double>::const_iterator
-                         list_it = map_it->second.begin();
-                     list_it != map_it->second.end(); list_it++) {
-                        timings_str = timings_str + to_string(*list_it) + ", ";
-                    }
-                    
-                    FILE_LOG(logINFO) << "Timing subcycle " << map_it->first
-                                    << ": " << timings_str;
-                }
-                im.ptree.print(logINFO);
-                im.getGlobalBindings()->print(logINFO);
-                FILE_LOG(logINFO) << "Print subcycle timings...";   
-            }
-            
-            if ((end_tick - start_tick) < (timer_period_microsec/1000000.0)) {
-                FILE_LOG(logDEBUG4) <<
-                    "########### intentially wasting: " << setprecision(20) <<
-                    ((timer_period_microsec/1000000.0) - (end_tick - start_tick)) <<
-                    " seconds."; 
-                usleep(timer_period_microsec - (end_tick - start_tick)*1000000.0);
-            } else {
-                FILE_LOG(logWARNING) <<
-                    "########### sampling period is short of: " << setprecision(20) <<
-                    ((end_tick - start_tick) - (timer_period_microsec/1000000.0)) <<
-                    " seconds.";
-                im.ptree.print(logWARNING);
-                im.getGlobalBindings()->print(logWARNING);
+    FILE_LOG(logINFO) << "Running timer with the period of " <<
+        timer_period_microsec << " microseconds." << endl;
+        /******************************
+         *
+         * Main loop
+         * 
+         ******************************/
+    while (1) {
+        double start_tick = getSystemTimeMSec()/1000.0;
+        FILE_LOG(logDEBUG4) <<
+            "############ Re-entering the main loop at: "
+                            << setprecision(20) << start_tick ;
+        
+        im.doTick();
+        
+            /* Dispatch actions collected at the output queue */
+        dispatchActionsFromOutputQueue();
+        
+            /* if running with text_ui, do the terminal screen update */
+        if (text_ui) {
+            ui_command =  textUI.update(im);
+            if ( ui_command == uiQuit) {
+                textUI.close();
+                FILE_LOG(logINFO) << "TextUI requested quit. Goodbye.";
+                return -1;
             }
         }
+        
+            /* check if need to swap log file */
+        FILE* pStream = Output2FILE::Stream();
+            // fseek( pStream, 0, SEEK_END );
+        int logfile_size = ftell( pStream );
+        FILE_LOG(logDEBUG3) << "Logfile size: " << logfile_size;
+        if (logfile_size > MAX_LOGFILE_SIZE ) {
+                /* move on to a new logfile */
+            if (!setLogFile(logfile_name)) {
+                return -1;
+            }
+        }
+        
+        double end_tick = getSystemTimeMSec()/1000.0;
+        
+        FILE_LOG(logDEBUG4) <<
+            "############ Done tick at: " << setprecision(20) <<
+            end_tick ;
+        
+        FILE_LOG(logDEBUG4) <<
+            "############ Cycle took: " << setprecision(20) <<
+            (end_tick - start_tick) << " seconds.";
+        
+            /** print sybcycle timings **/
+        if (im.timing_dump_counter == 0) {
+            FILE_LOG(logINFO) << "Print subcycle timings...";
+            for (std::map<string, std::list<double> >::const_iterator
+                     map_it = im.subcycle_timings.begin();
+                 map_it != im.subcycle_timings.end(); map_it++) {
+                string timings_str;
+                
+                for (std::list<double>::const_iterator
+                         list_it = map_it->second.begin();
+                     list_it != map_it->second.end(); list_it++) {
+                    timings_str = timings_str + to_string(*list_it) + ", ";
+                }
+                
+                FILE_LOG(logINFO) << "Timing subcycle " << map_it->first
+                                  << ": " << timings_str;
+            }
+            im.ptree.print(logINFO);
+            im.getGlobalBindings()->print(logINFO);
+            FILE_LOG(logINFO) << "Print subcycle timings...";   
+        }
+        
+        if ((end_tick - start_tick) < (timer_period_microsec/1000000.0)) {
+            FILE_LOG(logDEBUG4) <<
+                "########### intentially wasting: " << setprecision(20) <<
+                ((timer_period_microsec/1000000.0) - (end_tick - start_tick)) <<
+                " seconds."; 
+            usleep(timer_period_microsec - (end_tick - start_tick)*1000000.0);
+        } else {
+            FILE_LOG(logWARNING) <<
+                "########### sampling period is short of: " << setprecision(20) <<
+                ((end_tick - start_tick) - (timer_period_microsec/1000000.0)) <<
+                " seconds.";
+            im.ptree.print(logWARNING);
+            im.getGlobalBindings()->print(logWARNING);
+        }
     }
+        /*********
+         * End of main loop
+         * *******/
+    
 }

@@ -504,7 +504,6 @@ void InteractionManager::setGlobals() {
     Atom new_atom = *this->default_atoms.findAtom("type", "im", "subtype", "globals");
     this->pushAtomBinding(new_atom);
     FILE_LOG(logDEBUG) << "just pushed new IM globals atom to the root bindings.";
-    tree<Node>::iterator root = this->ptree.tr.begin();
 }
 
 Conjunction* InteractionManager::getGlobalBindings() {  
@@ -1049,17 +1048,10 @@ bool InteractionManager::initialize() {
     }
 
 
-        /* set script path directory */
+        /* check script path directory */
     if (this->script_path.empty()) {
-            /* if not set in command line, use environment var */
-        char* challenge_root = getenv("QROBO_HOME");
-        if (!challenge_root) {
-            cerr << "Error in imcore: QROBO_HOME undefined." << endl;
-            exit(1);
-        } else {
-            this->script_path = (string)challenge_root +"/scripts/";
-        }
-            
+        cerr << "IM error: script path is not set." << endl;
+        exit(1);        
     }
     
     if (!this->load_init(this->init_file_name)) {

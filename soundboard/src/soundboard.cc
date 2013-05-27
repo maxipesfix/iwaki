@@ -1,8 +1,7 @@
 /*****************************************************************************
- * PROJECT: Iwaki Interaction Manager
+ * PROJECT: Soundboard
  *
- * (c) Copyright 2009-2013 Maxim Makatchev, Reid Simmons,
- * Carnegie Mellon University. All rights reserved.
+ * (c) Copyright 2012-2013 Maxim Makatchev. All rights reserved.
  *
  * FILE: soundboard.cc
  *
@@ -10,7 +9,9 @@
  * that takes terminal input and plays sound files according to the recipes.
  *
  * SAMPLE COMMAND LINE: ./soundboard/soundboard -t 0.1 -d DEBUG4 -l log1
- *                       -p ~/h/im/scripts -i initialize_im.georgi.xml -x
+ *                       -p ~/h/iwaki/soundboard/scripts
+ *                       -i initialize_im.georgi.xml
+ *                       -s ~/h/iwaki/soundboard/sounds -x
  * 
  ****************************************************************/
 

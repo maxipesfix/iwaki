@@ -1,15 +1,13 @@
 /*****************************************************************************
- * PROJECT: Iwaki Interaction Manager
+ * PROJECT: Soundboard
  *
- * (c) Copyright 2009-2013 Maxim Makatchev, Reid Simmons,
- * Carnegie Mellon University. All rights reserved.
+ * (c) Copyright 2012-2013 Maxim Makatchev. All rights reserved.
  *
- * FILE: soundboard.cc
+ * FILE: soundboard.h
  *
- * ABSTRACT: an example use of the library. This is a simple application
- * that takes terminal input and plays sound files according to the recipes.
+ * ABSTRACT: an header file for the Soundboard example.
  *
- ****************************************************************/
+ * */
 
 #ifndef SOUNDBOARD_H
 #define SOUNDBOARD_H

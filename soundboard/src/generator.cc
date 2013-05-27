@@ -1,3 +1,16 @@
+/*****************************************************************************
+ * PROJECT: Soundboard
+ *
+ * (c) Copyright 2012-2013 Maxim Makatchev. All rights reserved.
+ *
+ * FILE: generator.cc
+ *
+ * ABSTRACT: An example action executor. This one just creates a new
+ * gstreamer process that plays the audio file specified in an Action
+ * and returns ActionStatus.
+ * 
+ * */
+
 #include <iostream>
 #include "log.h"
 #include "iwaki.h"

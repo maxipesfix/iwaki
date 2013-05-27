@@ -1,13 +1,14 @@
 /*****************************************************************************
- * PROJECT: Interaction Manager
+ * PROJECT: Soundboard
  *
- * (c) Copyright 2009, 2010, 2011 Maxim Makatchev. All rights reserved.
+ * (c) Copyright 2012-2013 Maxim Makatchev. All rights reserved.
  *
  * FILE: text_ui.cc
  *
- * ABSTRACT: a text user interface for the interaction manager
+ * ABSTRACT: an ncurses library based text interface with Iwaki interaction
+ * manager.
  *
- ****************************************************************/
+*/
 
 
 #include <iostream>

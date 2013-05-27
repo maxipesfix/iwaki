@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 project(IWAKI)
 
 
@@ -14,4 +14,4 @@ find_package(Curses)
 
 add_subdirectory(queueio)
 add_subdirectory(iwaki)
-add_subdirectory(soundboard)
+add_subdirectory(soundboard/src)

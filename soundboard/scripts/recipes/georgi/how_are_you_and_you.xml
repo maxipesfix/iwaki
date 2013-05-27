@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+
+<!-- how are you with a followup question. -->
+<recipe name="how_are_you_and_you">
+
+<!-- preconditions: unification amd bindings -->
+<precondition>
+    <atom quantifier="exist">
+      <!-- object type and subtype -->
+      <slot name="type" val="im"/>
+      <slot name="subtype" val="user"/>
+      <!-- arguments -->
+      <slot name="uu_unhandled" val="true" rel="equal"/>
+      <slot name="uu_string" val="how" rel="equal"/>
+      <!-- bindings -->
+      <slot name="id" rel="bind" var="present_user_id"/>
+      <slot name="this" rel="bind" var="present_user_atom"/>
+    </atom>
+</precondition>
+
+<!-- interrupt the recipe when this condition fails -->
+<whilecondition>
+</whilecondition>
+
+
+<body order="sequence">
+
+    <action name="generate_utterance" actor="generator" action_space="speech">
+      <roboml:args>
+        <arg name="utterance_file" value="georgi/good_and_you.ogg" type="string"/>
+      </roboml:args>
+    </action>
+
+    <assignment>
+      <atom>
+        <slot name="this" var="present_user_atom"/>
+        <slot name="q2u_how_are_you_handled" val="false"/>
+      </atom>
+    </assignment>
+
+    <goal recipe_name="any" initiator="any">
+      <atom>
+        <slot name="q2u_how_are_you_handled" val="true"/>
+        <slot name="this" var="present_user_atom"/>
+      </atom>
+    </goal>
+
+</body>
+
+<!-- set right after execution ends -->
+<assignpost>
+  <atom>
+    <!-- set object which name is equal to the one stored in var -->
+    <slot name="this" var="present_user_atom"/>
+    <slot name="uu_unhandled" val="false"/>
+  </atom>
+</assignpost>
+
+</recipe>
+
+
+<!-- how are you with a followup question. -->
+<recipe name="q2u_how_are_you_answer_yes">
+
+<!-- preconditions: unification amd bindings -->
+  <precondition>
+    <atom quantifier="exist">
+      <!-- object type and subtype -->
+      <slot name="type" val="im"/>
+      <slot name="subtype" val="user"/>
+      <!-- arguments -->
+      <slot name="uu_unhandled" val="true" rel="equal"/>
+      <slot name="uu_string" val="y" rel="equal"/>
+      <!-- bindings -->
+      <slot name="id" rel="bind" var="present_user_id"/>
+      <slot name="this" rel="bind" var="present_user_atom"/>
+    </atom>
+  </precondition>
+
+  <!-- interrupt the recipe when this condition fails -->
+  <whilecondition>
+  </whilecondition>
+
+
+  <body order="sequence">
+
+  <assignment>
+    <atom>
+      <slot name="this" var="present_user_atom"/>
+      <slot name="uu_unhandled" val="false"/>
+    </atom>
+  </assignment>
+
+    <action name="generate_utterance" actor="generator" action_space="speech">
+      <roboml:args>
+        <arg name="utterance_file" value="georgi/thats_good_thats_good.ogg" type="string"/>
+      </roboml:args>
+    </action>
+
+  </body>
+
+<!-- set right after execution ends -->
+  <assignpost>
+    <atom>
+    <!-- set object which name is equal to the one stored in var -->
+      <slot name="this" var="present_user_atom"/>
+      <slot name="q2u_how_are_you_handled" val="true"/>
+    </atom>
+  </assignpost>
+  
+</recipe>
+
+
+<!-- how are you with a followup question. -->
+<recipe name="q2u_how_are_you_answer_no">
+
+<!-- preconditions: unification amd bindings -->
+  <precondition>
+    <atom quantifier="exist">
+      <!-- object type and subtype -->
+      <slot name="type" val="im"/>
+      <slot name="subtype" val="user"/>
+      <!-- arguments -->
+      <slot name="uu_unhandled" val="true" rel="equal"/>
+      <slot name="uu_string" val="n" rel="equal"/>
+      <!-- bindings -->
+      <slot name="id" rel="bind" var="present_user_id"/>
+      <slot name="this" rel="bind" var="present_user_atom"/>
+    </atom>
+  </precondition>
+
+  <!-- interrupt the recipe when this condition fails -->
+  <whilecondition>
+  </whilecondition>
+
+
+  <body order="sequence">
+
+    <assignment>
+      <atom>
+        <slot name="this" var="present_user_atom"/>
+      <slot name="uu_unhandled" val="false"/>
+      </atom>
+    </assignment>
+
+    <action name="generate_utterance" actor="generator" action_space="speech">
+      <roboml:args>
+        <arg name="utterance_file" value="georgi/keep_it_up_man.ogg" type="string"/>
+      </roboml:args>
+    </action>
+
+  </body>
+
+<!-- set right after execution ends -->
+  <assignpost>
+    <atom>
+    <!-- set object which name is equal to the one stored in var -->
+      <slot name="this" var="present_user_atom"/>
+      <slot name="q2u_how_are_you_handled" val="true"/>
+      <slot name="uu_unhandled" val="false"/>
+    </atom>
+  </assignpost>
+  
+</recipe>

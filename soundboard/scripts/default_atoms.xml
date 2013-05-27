@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+
+
+<!-- default values for atom slots -->
+<default_atoms>
+  <!-- user atom -->
+  <atom>
+    <slot name="type" val="im"/>
+    <slot name="subtype" val="user"/>
+    <slot name="greeted" val="false"/>
+    <slot name="uu_unhandled" val="true"/>
+    <slot name="q2u_how_are_you_handled" val="false"/>
+    <slot name="q2u_have_you_seen_game_handled" val="false"/>
+    <slot name="u_prev_beat_time" val="0" type="number"/>
+  </atom>
+  <!-- globals atom -->
+  <atom>
+    <slot name="type" val="im"/>
+    <slot name="subtype" val="globals"/>
+    <slot name="time" val = "_NO_VALUE_" type="number" var="_im_time"/>
+    <slot name="prev_beat_time" val = "0" type="number"/>
+    <slot name="r_val" val = "1" type="number"/>
+    <slot name="beat_handled" val="false"/>
+  </atom>
+
+</default_atoms>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+
+<!-- This is the simple action specification, what BML
+calls level 0. All the interpretation of details are left
+to behavior realizer. The utterance is hard-coded in the
+behavior. -->
+
+
+<!-- The type of the arguments that represent behaviors module
+command should not be string - this is a little peculiarity,
+caused by the fact that string expressions are treated differently
+by behaviors. -->
+
+<bml name="direct">
+  <roboml:args>
+    <arg name="command" type="direct"/>
+  </roboml:args>
+</bml>
+
+<bml name="generate_utterance">
+  <roboml:args>
+    <arg name="utterance_string" default="_NO_VALUE_" type="string"/>
+    <arg name="utterance_token" default="_NO_VALUE_" type="string"/>
+    <arg name="utterance_file" default="_NO_VALUE_" type="string"/>
+    <arg name="test_arg" default="0" type="number"/>
+  </roboml:args>
+</bml>
+
+
+<!-- This are required default actions for any IM setup -->
+
+<bml name="abort_action">
+</bml>

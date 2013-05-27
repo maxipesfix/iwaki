@@ -43,6 +43,7 @@ using std::iostream;
 
 InteractionManager im;
 TextUI textUI;
+string sounds_path; /* path to the directory with sound files */
 
 #define KB_ENTER int('\n')
 
@@ -184,13 +185,14 @@ int main (int argc, char **argv)
                 {"timer",   required_argument, 0, 't'},
                 {"init",       required_argument, 0, 'i'},
                 {"atoms",       required_argument, 0, 'a'},
+                {"sounds",       required_argument, 0, 's'},
                 {"path",       required_argument, 0, 'p'},
                 {0, 0, 0, 0}
             };
             /* getopt_long stores the option index here. */
         int option_index = 0;
         
-        c = getopt_long (argc, argv, "hxl:d:t:i:a:p:",
+        c = getopt_long (argc, argv, "hxl:d:t:i:a:p:s:",
                          long_options, &option_index);
         
             /* Detect the end of the options. */
@@ -234,12 +236,14 @@ Usage: imcore [OPTION]... \n\
                              default initialize_im.xml\n\
 ";
                 cout << "\
-  -a --atoms DEFAULTS_FILE   name of the atom defaults file that overrides\n \
+  -a --atoms DEFAULTS_FILE   name of the atom defaults file that overrides\n\
                              default default_atoms.xml\n\
 ";
                 cout << "\
-  -p --path PATH             path to recipes, actions and functions directories\n \
-                             that overrides environment variable QROBO_HOME\n\
+  -p --path PATH             path to recipes, actions and functions directories\n\
+";
+                cout << "\
+  -s --sounds PATH           path to sounds files \n \
 ";
                 cout << "\
   -x --text_ui               turn on text ui. will supress normal debug and error \n\
@@ -295,6 +299,12 @@ Usage: imcore [OPTION]... \n\
             {
                 cvalue = optarg;
                 im.script_path = (string) ((const char*) cvalue);
+                break;
+            }
+            case 's':
+            {
+                cvalue = optarg;
+                sounds_path = (string) ((const char*) cvalue);
                 break;
             }
             default:

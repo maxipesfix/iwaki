@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+ 
+<iminit>
+  <!-- these recepies are always ready to be triggered by im itself-->
+  <triggerables>
+    <recipe name="how_are_you" max_instances="1"/>
+    <recipe name="how_are_you_and_you" max_instances="1"/>
+    <recipe name="heartbeat" max_instances="1"/>
+  </triggerables>
+
+ 
+  <recipefiles>
+    <file>georgi/how_are_you_and_you.xml</file>
+    <file>georgi/how_are_you.xml</file>
+    <file>georgi/heartbeat.xml</file>
+  </recipefiles>
+
+
+  <actionfiles>
+    <file>defaults.xml</file>
+  </actionfiles>
+</iminit>

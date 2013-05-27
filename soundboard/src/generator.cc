@@ -10,11 +10,10 @@
 
 #include <fstream>
 
-#define SOUNDS_DIR "/home/maxim/h/im/sounds/"
-
 using std::string;
 using std::iostream;
 
+extern string sounds_path;
 
 bool executeAction(Action &an_action) {
     string full_filename;
@@ -43,7 +42,7 @@ bool executeAction(Action &an_action) {
         if (utterance_file != "_NO_VALUE_") {
                 /* action included utterance file, ignore the rest */
 
-            full_filename = SOUNDS_DIR + utterance_file;
+            full_filename = sounds_path + utterance_file;
 
             ifstream sound_file(full_filename.c_str());
             

@@ -1,3 +1,15 @@
+/*****************************************************************************
+ * PROJECT: Iwaki Interaction Manager
+ *
+ * FILE: log.h
+ *
+ * ABSTRACT: This is a derivative of the logging code provided by
+ * Petru Marginean from his article at Dr. Dobb's at
+ * http://www.drdobbs.com/cpp/logging-in-c/201804215
+ *
+ * 
+ ****************************************************************/
+
 #ifndef __LOG_H__
 #define __LOG_H__
 

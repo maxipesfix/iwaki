@@ -1,14 +1,28 @@
 /*****************************************************************************
  * PROJECT: Soundboard
- *
- * (c) Copyright 2012-2013 Maxim Makatchev. All rights reserved.
- *
+ * 
  * FILE: generator.cc
  *
  * ABSTRACT: An example action executor. This one just creates a new
  * gstreamer process that plays the audio file specified in an Action
  * and returns ActionStatus.
- * 
+ *
+ * Soundboard: play sounds in response to keyboard according to Iwaki scripts
+ * Copyright (C) 2012-2013 Maxim Makatchev.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  * */
 
 #include <iostream>
@@ -55,7 +69,7 @@ bool executeAction(Action &an_action) {
         if (utterance_file != "_NO_VALUE_") {
                 /* action included utterance file, ignore the rest */
 
-            full_filename = sounds_path + utterance_file;
+            full_filename = sounds_path + "/" + utterance_file;
 
             ifstream sound_file(full_filename.c_str());
             

@@ -11,12 +11,17 @@ iwaki.a
 and a sample application:
 soundboard
 
+A manual can be found in the
+PROJECTDIR/doc
+
+directory.
+
 
 *******************
 * PREREQUISITES
 *******************
 
-* re2 regular expression library: http://code.google.com/p/re2/
+* RE2 regular expression library: http://code.google.com/p/re2/
 * ncurses
 
 
@@ -27,7 +32,7 @@ soundboard
 Make sure that CMakeLists.txt in this directory includes the correct location
 of your re2 library and header files.
 
-In the root iwaki installation directory (the location of this README) issue the following:
+In the PROJECTDIR directory (the location of this README) issue the following:
 
 mkdir build
 cd build
@@ -35,15 +40,18 @@ cmake ..
 make
 
 The library binaries are installed into:
-build/queueio/ and 
-build/iwaki/ 
+PROJECTDIR/build/queueio/ and 
+PROJECTDIR/build/iwaki/ 
 
 directories. The soundboard executable is installed into:
-build/soundboard/bin/ .
+PROJECTDIR/build/soundboard/bin/ .
 
+You are done!
 
-To run soundboard app from iwaki/build directory, type:
-./soundboard/bin/soundboard -t 0.1 -d DEBUG4 -l log1 -p ../soundboard/scripts -i initialize_im.georgi.xml -s <absolute path to iwaki installation>/iwaki/soundboard/sounds -x
+To run soundboard app from PROJECTDIR/build directory, type:
+./soundboard/bin/soundboard -t 0.1 -d DEBUG4 -l log1 -p ../soundboard/scripts -i initialize_im.georgi.xml -s PROJECTDIR/soundboard/sounds -x
+
+where PROJECTDIR is the absolute path to the root of the iwaki installation tree (and the location of this file).
 
 For more details on soundboard app, refer to README inside iwaki/soundboard/ directory.
 

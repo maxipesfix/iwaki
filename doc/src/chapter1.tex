@@ -31,26 +31,28 @@ Collaborative agent-based approach to dialogue management is only one of several
 
 \section{Overview}
 
-Similar to Collagen and Disco, IM creates and maintains a dialogue tree that represents the current state of the dialogue. At present, there is no separate task structure. According to the collaboration discourse theory, a dialogue is viewed as a hierarchy of tasks, and an utterance can contribute to a task in one of the three ways: (1) provide a needed input, (2) select a new task or subtask to work on, or (3) select a recipe to achieve the task. Like Collagen and Disco, IM extends this interpretation paradigm to include inputs of other modalities. 
+Similar to Collagen and Disco, IM creates and maintains a dialogue tree, called \textsl{interaction tree} that represents the current state of the interaction. Another component of the state is a set of global objects, called \textsl{atoms}, with variable \textsl{slots}. The global atoms are visible and writable from every node of the dialogue tree. The nodes of the dialogue tree are the instantiated \textsl{recipes}.
 
-The tree-growing process is a production-like system (c.f. CLIPS expert system~\citep{CLIPS}) that attempts to satisfy goals by backchaining on rules.  All the inputs and state changes are interpreted in the context of the current dialogue tree. According to the joint plan theory of interaction, every participant of the interaction contributes to building the joint plan. Generally, each participant may have their own view of the joint plan, distinct from others. IM considers only one view of the joint plan, which can be considered the robot's point of view.
+At present, Iwaki has no separate task structure. According to the collaboration discourse theory, a dialogue is viewed as a hierarchy of tasks, and an utterance can contribute to a task in one of the three ways: (1) provide a needed input, (2) select a new task or subtask to work on, or (3) select a recipe to achieve the task. Like Collagen and Disco, IM extends this interpretation paradigm to include inputs of other modalities. 
 
-The knowledge that comes from outside of IM (facts) is represented as logical formulae. In the simple case, these facts form a conjunction of \textsl{atoms}, where each atom is a partially grounded predicate. 
+The interaction tree-growing process is a production-like system (c.f. CLIPS expert system~\citep{CLIPS}) that attempts to satisfy goals by backchaining on rules.  All the inputs and state changes are interpreted in the context of the current interaction tree. According to the joint plan theory of interaction, every participant of the interaction contributes to building the joint plan. Generally, each participant may have their own view of the joint plan, distinct from others. Iwaki considers only one view of the joint plan, which can be considered the robot's point of view.
+
+The knowledge that comes from outside of the interaction manager (facts) is represented as a set (actually, a conjunction) of \textsl{atoms}, where each atom is a partially grounded predicate. 
 
 IM \textsl{recipes} have a function similar to Disco and Collagen recipes, and correspond to the rules of a production system. A recipe consists of a precondition, a body and a postcondition. A precondition is a disjunctive normal form (DNF) of partially grounded atoms. A body of the recipe is an ordered sequence of \textsl{actions}, \textsl{assignments}, or \textsl{goals}. The postcondition of a recipe is an assignment.
 
 
-The are several ways in which IM differs from a typical production system:
+The are several ways in which Iwaki interaction manager differs from a typical production system:
 
 \begin{itemize}    
-\item Items in the body of a recipe (corresponding to the right hand side of a production rule) are executed in order (sequentially by default). The execution proceeds to the next item when execution of the previous item is successfully completed.
-\item There is a mechanism to control the flow of execution depending on the return status of actions. For example, if a time-sensitive action, such as saying ``goodbye'' to a departing user, has been aborted by the executor, for some reason, the IM may need to purge the rest of the farewell recipe. If that was a greeting, the IM may retry sending it to the behavior executor, or skip it and move to the next action in the greeting recipe.
+\item Items in the body of a recipe (corresponding to the right-hand side of a production rule) are executed in order (sequentially by default). Generally, the execution proceeds to the next item when execution of the previous item is successfully completed.
+\item There is a mechanism to control the flow of execution depending on the return status of actions. For example, if a time-sensitive action, such as saying ``goodbye'' to a departing user, has been aborted by the executor, for some reason, Iwaki may need to purge the rest of the farewell recipe. If that was a greeting, Iwaki may retry sending it to the behavior executor, or skip it and move to the next action in the greeting recipe.
 \item There is a mechanism for timing out of items in the body of a recipe.
 \item There is a whilecondition, failure of which triggers purging of the recipe.
 %and for the parallel execution 
 \end{itemize}
 
-IM's dialogue tree interface implements the three ways of interpretation of an input specified by collaborative discourse theory. Notably, IM allows interleaved recipe execution, resulting in simultaneous multi-topic dialogues. However, at the present state, IM does not implement many of the features of Collagen and Disco, such as a \textsl{focus stack}.
+Iwaki interaction tree interface implements the three ways of interpretation of an input specified by collaborative discourse theory. Notably, Iwaki allows interleaved recipe execution, resulting in simultaneous multi-topic dialogues. However, at the present state, the interaction manager does not implement many of the features of Collagen and Disco, such as a \textsl{focus stack}.
 
 \section{Applications}
 

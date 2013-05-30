@@ -1,0 +1,64 @@
+\chapter{Introduction} % Write in your own chapter title
+\label{Chapter1}
+%\lhead{Chapter 1. \emph{Introduction}} % Write in your own chapter title to set the page header
+
+
+Iwaki Interaction Manager is an open-source dialogue manager that is not limited to dialogue. It is most closely related to the \textsl{SharedPlan} theory of discourse~\citep{GrozsSidner1990,Lochbaum1998}, and its implementation, COLLAGEN~\citep{RichSidner1998}. From the interaction pespective, it is designed to enable:
+\begin{itemize}
+\item Multi-modal interaction. Iwaki actions can be be interpreted by action generators of any nature.
+\item Multi-party interaction. Iwaki has the functionality to keep the context related to each individual interactor.
+\item Flexible turn taking and mixed initative. As a dialog manager, Iwaki can take initative in turn taking based on the system state, such as time. Similarly, Iwaki can process a user utterance produced at any time.
+\item Flexible discourse structure. Iwaki can respond to the user's utterance that is out of the current context.
+%\item Flexible turn interpretation. TO BE IMPLEMENTED.
+\end{itemize}
+
+From the interaction designer's perspective, Iwaki differs from some other dialogue managers in that:
+
+\begin{itemize}
+\item Interaction designer and content developer do not need to write code. Iwaki scripts are XML that can be generated via web forms or by hand.
+\item Iwaki does not make you choose between information-state and a script-based dialogue management. To an extent, you can have both.
+\item Iwaki is designed to play well with other developing standards for interaction design, such as BML.
+\item Iwaki is soft real-time. Iwaki scripts can be time-sensitive, hense it likes to be called periodically and on time.
+\end{itemize}
+
+From the software architecture prospective, Iwaki is a C++ library that can be called periodically from your interaction module to update its state and process inputs and outputs. In a complex application, however, to ensure timely periodic calls to the interaction manager, Iwaki library would likely be wrapped into a separate executable and interface with the rest of the system via an interprocess communication.
+
+\section{Related work}
+
+Collaborative agent-based approach to dialogue management is only one of several approaches to dialogue management (see an overview by \citet{Bui2006}). Previously, the definitive implementation of the \textsl{SharedPlan} model~\citep{GrozsSidner1990} of collaborative discourse was the Collagen collaboration manager~\citep{RichSidner1998}, which was proprietary. An open source successor of Collagen, called Disco~\citep{RichSidner2012}, is currently under active development. An extension of SharedPlans that explicitly represents the task structure, called Collaborative Problem-Solving~\citep{Blaylock2005}, has been used in another proprietary dialogue manager, SAMMIE~\citet{Becker2006}. In the development of the IM, we follow the main ideas presented in Collagen and Disco and adapt them for our specific needs.
+
+
+
+\section{Overview}
+
+Similar to Collagen and Disco, IM creates and maintains a dialogue tree that represents the current state of the dialogue. At present, there is no separate task structure. According to the collaboration discourse theory, a dialogue is viewed as a hierarchy of tasks, and an utterance can contribute to a task in one of the three ways: (1) provide a needed input, (2) select a new task or subtask to work on, or (3) select a recipe to achieve the task. Like Collagen and Disco, IM extends this interpretation paradigm to include inputs of other modalities. 
+
+The tree-growing process is a production-like system (c.f. CLIPS expert system~\citep{CLIPS}) that attempts to satisfy goals by backchaining on rules.  All the inputs and state changes are interpreted in the context of the current dialogue tree. According to the joint plan theory of interaction, every participant of the interaction contributes to building the joint plan. Generally, each participant may have their own view of the joint plan, distinct from others. IM considers only one view of the joint plan, which can be considered the robot's point of view.
+
+The knowledge that comes from outside of IM (facts) is represented as logical formulae. In the simple case, these facts form a conjunction of \textsl{atoms}, where each atom is a partially grounded predicate. 
+
+IM \textsl{recipes} have a function similar to Disco and Collagen recipes, and correspond to the rules of a production system. A recipe consists of a precondition, a body and a postcondition. A precondition is a disjunctive normal form (DNF) of partially grounded atoms. A body of the recipe is an ordered sequence of \textsl{actions}, \textsl{assignments}, or \textsl{goals}. The postcondition of a recipe is an assignment.
+
+
+The are several ways in which IM differs from a typical production system:
+
+\begin{itemize}    
+\item Items in the body of a recipe (corresponding to the right hand side of a production rule) are executed in order (sequentially by default). The execution proceeds to the next item when execution of the previous item is successfully completed.
+\item There is a mechanism to control the flow of execution depending on the return status of actions. For example, if a time-sensitive action, such as saying ``goodbye'' to a departing user, has been aborted by the executor, for some reason, the IM may need to purge the rest of the farewell recipe. If that was a greeting, the IM may retry sending it to the behavior executor, or skip it and move to the next action in the greeting recipe.
+\item There is a mechanism for timing out of items in the body of a recipe.
+\item There is a whilecondition, failure of which triggers purging of the recipe.
+%and for the parallel execution 
+\end{itemize}
+
+IM's dialogue tree interface implements the three ways of interpretation of an input specified by collaborative discourse theory. Notably, IM allows interleaved recipe execution, resulting in simultaneous multi-topic dialogues. However, at the present state, IM does not implement many of the features of Collagen and Disco, such as a \textsl{focus stack}.
+
+\section{Applications}
+
+
+Iwaki interaction manager has been originally developed to control interaction of social robots at the Robotics Institute of Carnegie Mellon University. It powers such robots as Gamebot, the scrabble-playing trash-talking robot, and Hala 2, the bilingual robot receptionist at CMU Qatar~\citep{Simmons2011}. It has also been used as a rather advanced soundboard to generate dialogue for a radio show side-kick, called Uncle Georgi. The soundboard application code is provided with Iwaki distribution as an example.
+
+\section{License}
+
+Iwaki Interaction Manager is distributed under the conditions of GPLv3. Copyright \textcopyright\ 2009--2013, Maxim Makatchev, Reid Simmons, Carnegie Mellon University. 
+
+For a copy of the GNU General Public License see \url{http://www.gnu.org/licenses/}.

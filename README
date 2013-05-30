@@ -30,7 +30,7 @@ directory.
 *******************
 
 Make sure that CMakeLists.txt in this directory includes the correct location
-of your re2 library and header files.
+of your RE2 library and header files.
 
 In the PROJECTDIR directory (the location of this README) issue the following:
 

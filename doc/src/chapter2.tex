@@ -2,189 +2,65 @@
 \label{Chapter2}
 %\lhead{Chapter 1. \emph{Introduction}} % Write in your own chapter title to set the page header
 
-This chapter intends to briefly get the reader up to speed with an example IM installation. There are three types of files that IM needs to find in its scripts directory: the configuration file, recipe files in \texttt{SCRIPTROOT/recipes} subdirectory, and action definition files, in \texttt{SCRIPTROOT/actions}. The location of the scripts directory, as well as the name of the configuration file, can be specified as command line arguments to the IM executable, \texttt{imcore}.
+This chapter's goal is to quickly get the reader going with the Iwaki installation and the example soundboard application. 
 
+\section{Installing on Unix}
 
-\section{Running a standalone process}
+\subsection{Prerequisites}
 
-Command: \texttt{imcore}
+In addition to the usual packages necessary to build a C++ executable on a Linux platform you will need the following libraries:
 
-\vskip 2mm
+\begin{itemize}
+\item \texttt{ncurses} library (available from Ubuntu repositories).
+\item \texttt{RE2} regular expression library. Install it from \url{http://code.google.com/p/re2}
+\end{itemize}
 
-\noindent Command line options:
+Furthermore, the Soundboard application plays sounds using gstreamer, so make sure it is installed and runnable via via \texttt{gst-launch-0.10} command.
+
+\subsection{Install Iwaki}
+
+In the root of the Iwaki distribution directory, which we will refer to as \texttt{PROJECTDIR}, examine the file CMakeLists.txt. Make sure it includes the correct location of your RE2 library and header files.
+
+To build the binaries in a directory outside of the source tree, type
+\lstset{language=bash}
+\begin{lstlisting}
+mkdir build
+cd build
+cmake ..
+make
+\end{lstlisting}
+
+\section{Running Soundboard application}
+
+The soundboard executable should be created in \texttt{PROJECTDIR/build/soundboard/bin}.
+You can run it from \texttt{PROJECTDIR/build} by typing the following command line (make sure to replace PROJECTDIR with the actual location of the root of the installed Iwaki distribution).
+
+\lstset{language=bash}
+\begin{lstlisting}
+./soundboard/bin/soundboard -t 0.1 -d DEBUG4 -l log1 -p ../soundboard/scripts -i initialize_im.georgi.xml -s PROJECTDIR/soundboard/sounds -x
+\end{lstlisting}
+
+The command line options specify the following:
 
 \begin{itemize}
 \item[] \texttt{-h} \hspace{2cm} Prints command line options information
 
 \item[] \texttt{-d level} \hspace{2cm} One of the following debug levels: \texttt{ERROR}, \texttt{WARNING}, \texttt{INFO}, \texttt{DEBUG}, \texttt{DEBUG1}, \texttt{DEBUG2}, \texttt{DEBUG3}, \texttt{DEBUG4}
 
-\item[] \texttt{-t timer\_period} \hspace{2cm} If present, this option causes IM to run in timer mode, where ever timer\_period seconds IM state update is forced.
+\item[] \texttt{-t timer\_period} \hspace{2cm} Specifies the period in seconds between calls to Iwaki update.
 
-\item[] \texttt{-l path/log\_file\_prefix} \hspace{2cm} If present, this option causes all the debug output be directed to the file prefixed
+\item[] \texttt{-l path/log\_file\_prefix} \hspace{2cm} If present, this option directs all the debug output to the file prefixed with \texttt{log\_file\_prefix}.
 
-\item[] \texttt{-x} \hspace{2cm} If present, this option enables the text-based status of IM displayed in the current terminal window.
+\item[] \texttt{-x} \hspace{2cm} If present, this option enables the text-based user interface displayed in the current terminal window.
 
-\item[] \texttt{-p path} \hspace{2cm} If present, override the default path of IM scripts directory.
+\item[] \texttt{-p path} \hspace{2cm} Path to IM scripts directory. This directory should contain init file.
 
-\item[] \texttt{-i init\_file} \hspace{2cm} If present, overrides the default init file name located in the root of IM scripts directory.
+\item[] \texttt{-i init\_file} \hspace{2cm} If present, overrides the default init file name, initialize\_im.xml. 
 
-\end{itemize}
-
-\section{Configuration file}
-
-IM configuration file is located in the root of scripts directory, and by default is named \texttt{initialize\_im.xml}. The default init file name can be changed by \texttt{-i init\_file} command line option.
-
-The initializer file has three sections: list of triggerable recipes, list of recipe files and list of action files---see the example below.
-
-\lstset{language=XML}
-\begin{lstlisting}
-<?xml version="1.0" encoding="US-ASCII"?>
- 
-<iminit>
-  <!-- these recepies are always ready to be triggered by im itself-->
-  <triggerables>
-     <recipe name="engage user name qa" max_instances="any"/>
-     <recipe name="heartbeat" max_instances="1"/>
-  </triggerables>
- 
-  <recipefiles>             
-   <file>engageuser.xml</file>
-   <file>engageuser_seq.xml</file>
-   <file>engageuser_name_qa.xml</file>
-   <file>answer_weather_followup.xml</file>
-   <file>answer_weather_followup_yes.xml</file>
-   <file>answer_weather_followup_no.xml</file>
-   <file>heartbeat.xml</file>   
-   <file>chatwithuser.xml</file>
-  </recipefiles>
-
-  <actionfiles>
-    <file>defaults.xml</file>
-    <file>say.xml</file>
-    <file>misc.xml</file>
-    <file>angry.xml</file>
-    <file>common.xml</file>
-  </actionfiles>
-</iminit>
-\end{lstlisting}
-
-\section{Recipes}
-
-IM is a production system, with rules specified as recipes. A recipe consists of the following elements:
-
-\begin{itemize}
-\item XML header: 
-\begin{lstlisting}
-  <?xml version="1.0" encoding="US-ASCII"?>
-\end{lstlisting}
-
-\item A unique recipe name: 
-\begin{lstlisting}
-  <recipe name="engage user name qa">
-\end{lstlisting}
-
-\item A precondition, which is either a Formula (a disjunction of a few conjunctions), or a set of Atoms corresponding to a single conjunction: 
-\begin{lstlisting}
-<!-- preconditions: unification amd bindings -->
-<precondition>
-    <atom quantifier="exist">
-      <!-- object type and subtype -->
-      <slot name="type" val="im"/>
-      <slot name="subtype" val="user"/>
-      <!-- arguments -->
-      <slot name="present" val="true"/>
-      <slot name="engaged" val="false"/>
-      <slot name="has_been_engaged" val="false"/>
-      <!-- bindings -->
-      <slot name="invite_string" rel="bind" var="hala_invite_string"/>
-      <slot name="id" rel="bind" var="present_user_id"/>
-      <slot name="this" rel="bind" var="present_user_atom"/>
-    </atom>
-</precondition>
-\end{lstlisting}
-
-\item A whilecondition, which is either a Formula (a disjunction of a few conjunctions), or a set of Atoms corresponding to a single conjunction:
-\begin{lstlisting}
-<!-- purge the recipe when this condition fails -->
-<whilecondition>
-  <atom>
-    <slot name="present" val="true"/>
-    <slot name="this" var="present_user_atom"/>
-  </atom>
-</whilecondition>
-\end{lstlisting}
-
-\item A body of the recipe, which is a sequence of one of the following elements: an assignment, an action, a goal. By default the steps are performed sequentially and conditionally on the successful execution of the preceding steps. 
-
-\begin{lstlisting}
-<body order="sequence">
-  <assignment>
-          <atom>
-              <slot name="engaged" val="true"/>
-                <slot name="this" var="present_user_atom"/>
-          </atom>
-  </assignment>
-  <action name="say_hello_ask_name" actor="robot" if_node_purged="abort"/>
-  <action name="say_name" actor="user"/>
-  <action name="say_nice_to_meet_you_name" actor="robot"/>
-  <goal recipe_name="any" initiator="any">
-    <atom>
-      <slot name="uu_unhandled" val="false"/>
-      <slot name="this" var="present_user_atom"/>
-    </atom>
-  </goal>
-  <action name="say_goodbye_name" actor="robot"/>
- <!--  -->
-</body>
-\end{lstlisting}
-
-\item An assignpost, which is an assignment that is to be performed upon the completion of the recipe. This assignment are equivalent to the assignments in the end of the recipe body, except for they are also used in matching the recipe against the currently active goal. 
-
-\begin{lstlisting}
-<!-- set right after execution ends -->
-<assignpost>
-  <atom>
-    <!-- set object which name is equal to the one stored in var -->
-    <slot name="this" var="present_user_atom"/>
-    <slot name="has_been_engaged" val="true"/>
-    <slot name="engaged" val="false"/>
-  </atom>
-</assignpost>
-\end{lstlisting}
-
-\section{Action definition files}
-
-Actions are the outputs of the Interaction Manager. They consist of a list of arguments, sequence of datablocks, and elements defined by the Behavior Markup Language~\citep{BMLweb}.
-
-
-Here is an action with an argument and two datablocks:
-\begin{lstlisting}
-<?xml version="1.0" encoding="US-ASCII"?>
-
-<bml name="angry_response1">
-    <roboml:args>
-        <arg name="arg_utterance" type="string"/>
-    </roboml:args>
-
-    <roboml:datablock>
-        <animation_id>frown1</animation_id>
-        <intensity>1.0</intensity>
-        <text>$arg_utterance</text>
-        <focus></focus>
-        <head></head>
-    </roboml:datablock>
-
-    <roboml:datablock>
-        <animation_id>frown2</animation_id>
-        <intensity>1.0</intensity>
-        <text></text>
-        <focus></focus>
-        <head></head>
-    </roboml:datablock>
-</bml>
-\end{lstlisting}
-
-
-
+\item[] \texttt{-s path to sound files} \hspace{2cm} Absolute path to the sound file directory.
 
 \end{itemize}
+
+
+If Soundboard has successfully started you should hear a hearbeat sound at random integer intervals between 1 and 4 seconds. Type ``h'' or ``how'' and press enter to greet the Soundboard character, you should hear a response.
+

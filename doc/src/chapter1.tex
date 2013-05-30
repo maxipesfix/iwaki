@@ -3,11 +3,11 @@
 %\lhead{Chapter 1. \emph{Introduction}} % Write in your own chapter title to set the page header
 
 
-Iwaki Interaction Manager is an open-source dialogue manager that is not limited to dialogue. It is most closely related to the \textsl{SharedPlan} theory of discourse~\citep{GrozsSidner1990,Lochbaum1998}, and its implementation, COLLAGEN~\citep{RichSidner1998}. From the interaction pespective, it is designed to enable:
+Iwaki Interaction Manager is an open-source dialogue manager that is not limited to dialogue. It is most closely related to the \textsl{SharedPlan} theory of discourse~\citep{GrozsSidner1990,Lochbaum1998}, and its implementation, COLLAGEN~\citep{RichSidner1998}. From the interaction perspective, it is designed to enable:
 \begin{itemize}
 \item Multi-modal interaction. Iwaki actions can be be interpreted by action generators of any nature.
 \item Multi-party interaction. Iwaki has the functionality to keep the context related to each individual interactor.
-\item Flexible turn taking and mixed initative. As a dialog manager, Iwaki can take initative in turn taking based on the system state, such as time. Similarly, Iwaki can process a user utterance produced at any time.
+\item Flexible turn taking and mixed initiative. As a dialog manager, Iwaki can take initiative in turn taking based on the system state, such as time. Similarly, Iwaki can process a user utterance produced at any time.
 \item Flexible discourse structure. Iwaki can respond to the user's utterance that is out of the current context.
 %\item Flexible turn interpretation. TO BE IMPLEMENTED.
 \end{itemize}
@@ -18,7 +18,7 @@ From the interaction designer's perspective, Iwaki differs from some other dialo
 \item Interaction designer and content developer do not need to write code. Iwaki scripts are XML that can be generated via web forms or by hand.
 \item Iwaki does not make you choose between information-state and a script-based dialogue management. To an extent, you can have both.
 \item Iwaki is designed to play well with other developing standards for interaction design, such as BML.
-\item Iwaki is soft real-time. Iwaki scripts can be time-sensitive, hense it likes to be called periodically and on time.
+\item Iwaki is soft real-time. Iwaki scripts can be time-sensitive, hence it likes to be called periodically and on time.
 \end{itemize}
 
 From the software architecture prospective, Iwaki is a C++ library that can be called periodically from your interaction module to update its state and process inputs and outputs. In a complex application, however, to ensure timely periodic calls to the interaction manager, Iwaki library would likely be wrapped into a separate executable and interface with the rest of the system via an interprocess communication.
@@ -57,7 +57,7 @@ Iwaki interaction tree interface implements the three ways of interpretation of 
 \section{Applications}
 
 
-Iwaki interaction manager has been originally developed to control interaction of social robots at the Robotics Institute of Carnegie Mellon University. It powers such robots as Gamebot, the scrabble-playing trash-talking robot, and Hala 2, the bilingual robot receptionist at CMU Qatar~\citep{Simmons2011}. It has also been used as a rather advanced soundboard to generate dialogue for a radio show side-kick, called Uncle Georgi. The soundboard application code is provided with Iwaki distribution as an example.
+Iwaki interaction manager has been originally developed to control interaction of social robots at the Robotics Institute of Carnegie Mellon University. It powers such robots as Gamebot, the scrabble-playing trash-talking robot, and Hala 2, the bilingual robot receptionist at CMU Qatar~\citep{Simmons2011}. It has also been used as a rather advanced soundboard to generate dialogue for radio show sidekick characters. The soundboard application code is provided with Iwaki distribution as an example.
 
 \section{License}
 

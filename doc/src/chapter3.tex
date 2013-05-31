@@ -1,0 +1,140 @@
+\chapter{Content representation in Iwaki}
+\label{Chapter3}
+
+\section{Initialization file}
+
+Iwaki initialization file is located in the root of scripts directory, and by default is named \texttt{initialize\_im.xml}. The default init file name can be changed by \texttt{-i init\_file} command line option.
+
+The initializer file has three sections: list of triggerable recipes, list of recipe files and list of action files---see the example below.
+
+\lstset{language=XML}
+\begin{lstlisting}
+<?xml version="1.0" encoding="US-ASCII"?>
+ 
+<iminit>
+  <!-- these recepies are always ready to be triggered by im itself-->
+  <triggerables>
+    <recipe name="how_are_you" max_instances="1"/>
+    <recipe name="how_are_you_and_you" max_instances="1"/>
+    <recipe name="heartbeat" max_instances="1"/>
+  </triggerables>
+
+ 
+  <recipefiles>
+    <file>georgi/how_are_you_and_you.xml</file>
+    <file>georgi/how_are_you.xml</file>
+    <file>georgi/heartbeat.xml</file>
+  </recipefiles>
+
+
+  <actionfiles>
+    <file>defaults.xml</file>
+  </actionfiles>
+</iminit>
+\end{lstlisting}
+
+\section{Recipes}
+
+IM is a production system, with rules specified as recipes. A recipe consists of the following elements:
+
+\begin{itemize}
+\item XML header: 
+\begin{lstlisting}
+  <?xml version="1.0" encoding="US-ASCII"?>
+\end{lstlisting}
+
+\item A unique recipe name: 
+\lstset{language=XML}
+\begin{lstlisting}
+  <recipe name="heartbeat">
+\end{lstlisting}
+
+\item A precondition, which is either a Formula (a disjunction of a few conjunctions), or a set of Atoms corresponding to a single conjunction:
+\lstset{language=XML}
+\begin{lstlisting}
+<!-- preconditions: unification and bindings -->
+<precondition>
+    <atom quantifier="exist">
+      <!-- object type and subtype -->
+      <slot name="type" val="im"/>
+      <slot name="subtype" val="globals"/>
+      <!-- arguments -->
+      <slot name="prev_beat_time" rel="<" val="\$_im_time-randi(1,5)" type="number"/>
+      <!--bindings -->
+      <slot name="time" rel="bind" var="_im_time"/>
+      <slot name="this" rel="bind" var="the_globals_atom"/>
+    </atom>
+  </precondition>
+\end{lstlisting}
+
+\item A whilecondition, which is either a Formula (a disjunction of a few conjunctions), or a set of Atoms corresponding to a single conjunction:
+
+\lstset{language=XML}
+\begin{lstlisting}
+<!-- purge the recipe when this condition fails -->
+<whilecondition>
+  <atom>
+    <slot name="present" val="true"/>
+    <slot name="this" var="present_user_atom"/>
+  </atom>
+</whilecondition>
+\end{lstlisting}
+
+Not that wilecondition can be empty, as in the \texttt{heartbeat} recipe.
+
+\item A body of the recipe, which is a sequence of one of the following elements: an assignment, an action, a goal. By default the steps are performed sequentially and conditionally on the successful execution of the preceding steps. 
+
+\lstset{language=XML}
+\begin{lstlisting}
+ <body order="sequence">
+    <assignment>
+      <atom>
+        <slot name="prev_beat_time" val="$_im_time" type="number"/>
+        <slot name="this" var="the_globals_atom"/>
+      </atom>
+    </assignment>
+
+    <action name="generate_utterance" actor="generator" action_space="speech">
+      <roboml:args>
+        <arg name="utterance_file" value="georgi/heartbeat.ogg" type="string"/>
+      </roboml:args>
+    </action>
+    
+  </body>
+\end{lstlisting}
+
+\item An assignpost, which is an assignment that is to be performed upon the completion of the recipe. This assignment are equivalent to the assignments in the end of the recipe body, except for they are also used in matching the recipe against the currently active goal. 
+
+\lstset{language=XML}
+\begin{lstlisting}
+<!-- set right after execution ends -->
+  <assignpost>
+    <atom>
+    <!-- set object which name is equal to the one stored in var -->
+      <slot name="this" var="present_user_atom"/>
+      <slot name="q2u_how_are_you_handled" val="true"/>
+    </atom>
+  </assignpost>
+\end{lstlisting}
+
+
+\end{itemize}
+
+\section{Action definition files}
+
+Actions are the outputs of the Interaction Manager. They consist of a list of arguments, sequence of datablocks, and elements defined by the Behavior Markup Language~\citep{BMLweb}.
+
+
+Here is an action with 4 arguments:
+
+\lstset{language=XML}
+\begin{lstlisting}
+<bml name="generate_utterance">
+  <roboml:args>
+    <arg name="utterance_string" default="_NO_VALUE_" type="string"/>
+    <arg name="utterance_token" default="_NO_VALUE_" type="string"/>
+    <arg name="utterance_file" default="_NO_VALUE_" type="string"/>
+    <arg name="test_arg" default="0" type="number"/>
+  </roboml:args>
+</bml>
+\end{lstlisting}

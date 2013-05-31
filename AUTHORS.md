@@ -7,9 +7,9 @@ Iwaki is distributed under GPLv3.
 
 # Queueio and Iwaki libraries
 
-  - [@maxipesfix] Maxim Makatchev &lt;makatchev at gmail.com&gt;  
+  - Maxim Makatchev &lt;makatchev at gmail.com&gt;  
   - Reid Simmons
 
 # Soundboard
 
-  - [@maxipesfix] Maxim Makatchev &lt;makatchev at gmail.com&gt;  
+  - Maxim Makatchev &lt;makatchev at gmail.com&gt;  

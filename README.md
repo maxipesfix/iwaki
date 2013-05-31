@@ -1,4 +1,5 @@
 iwaki
 =====
 
-Iwaki Interaction Manger
+Iwaki Interaction Manager
+ 

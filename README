@@ -25,7 +25,8 @@ directory.
 
 * RE2 regular expression library: http://code.google.com/p/re2/
 * ncurses
-
+* Additionally, to run the Soundboard app, you will need to install gstreamer.
+  On Ubuntu this is done by installing the package gstreamer0.10-tools.
 
 *******************
 * TO INSTALL on Linux

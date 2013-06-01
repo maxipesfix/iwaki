@@ -1,6 +1,11 @@
+Soundboard 
+=====
 Soundboard is an example app that uses Iwaki interaction manager library. 
 
-To run, type:
+
+## How to run?
+
+To run Sounboard, type:
 
 soundboard 
 -t <period of the main loop in seconds> 
@@ -18,5 +23,14 @@ For example, from the h/iwaki/build directory on my computer I type:
 For a complete list of options run:
 soundboard -h
 
+## What can it do?
+
+It contains recipes to demonstrate some capabilities of Iwaki interaction manager:
+
+  - Timed actions: it will make a sound of a heartbeat at random intervals between 1 and 4 seconds.
+  - Random actions: if you type "h" it will speak one of the two phrases, at random.
+  - Conditionals/branching: if you time "how", it will say "Good, and you?" and then, depending on your answer "y" (yes, good) or "n" (not good) it will say different follow-ups.
+
+## License
 
 Copyright (C) 2012-2013 Maxim Makatchev. Released under GPLv3.

@@ -10,13 +10,13 @@ To run Sounboard, type:
 
 <pre>
 soundboard 
--t < period of the main loop in seconds > 
--d < debug level > 
--l < location and prefix of the log file > 
--p < path of the top-level script directory containing init file > 
--i < name of the init file > 
--s < absolute path of the sound files > 
--x
+   -t < period of the main loop in seconds > 
+   -d < debug level > 
+   -l < location and prefix of the log file > 
+   -p < path of the top-level script directory containing init file > 
+   -i < name of the init file > 
+   -s < absolute path of the sound files > 
+   -x
 </pre>
 
 For example, from the h/iwaki/build directory on my computer I type:

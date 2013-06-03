@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>iwaki</name>
+  <version>0.0.0</version>
+  <description>The iwaki interaction manager package</description>
+  <maintainer email="maxi@cmu.edu">Maxim Makatchev</maintainer>
+  <license>GPLv3</license>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
+
+</package>

@@ -4,7 +4,7 @@ project(iwaki)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs message_generation)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -26,6 +26,15 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs)
 #   Message2.msg
 # )
 
+add_message_files(
+  FILES
+  AtomMsg.msg
+  VarSlot.msg
+  ActionMsg.msg
+  ArgSlot.msg  
+  ActionStatusMsg.msg
+)
+
 ## Generate services in the 'srv' folder
 # add_service_files(
 #   FILES
@@ -34,10 +43,10 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  )
 
 ###################################
 ## catkin specific configuration ##
@@ -50,7 +59,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs)
 catkin_package(
    INCLUDE_DIRS include
 #  LIBRARIES iwaki
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+   CATKIN_DEPENDS message_runtime roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
 
@@ -63,6 +72,11 @@ catkin_package(
 include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
+
+add_executable(talker src/talker.cpp)
+target_link_libraries(talker ${catkin_LIBRARIES})
+
+add_dependencies(talker iwaki_generate_messages_cpp)
 
 ## Declare a cpp library
 # add_library(iwaki

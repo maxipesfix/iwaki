@@ -1,6 +1,6 @@
 Name: iwaki
 Description: Description of iwaki
 Version: 0.0.0
-Cflags: -I/home/maxim/h/iwaki/ros/src/iwaki/include
+Cflags: -I/home/maxim/h/iwaki/ros/devel/include -I/home/maxim/h/iwaki/ros/src/iwaki/include
 Libs: -L/home/maxim/h/iwaki/ros/devel/lib 
-Requires: 
+Requires: message_runtime roscpp rospy std_msgs

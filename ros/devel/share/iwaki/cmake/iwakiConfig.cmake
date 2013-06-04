@@ -83,9 +83,9 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(iwaki_FOUND_CATKIN_PROJECT TRUE)
 
-if(NOT "/home/maxim/h/iwaki/ros/src/iwaki/include" STREQUAL "")
+if(NOT "/home/maxim/h/iwaki/ros/devel/include;/home/maxim/h/iwaki/ros/src/iwaki/include" STREQUAL "")
   set(iwaki_INCLUDE_DIRS "")
-  set(absolute_include_dirs "/home/maxim/h/iwaki/ros/src/iwaki/include")
+  set(absolute_include_dirs "/home/maxim/h/iwaki/ros/devel/include;/home/maxim/h/iwaki/ros/src/iwaki/include")
   foreach(idir ${absolute_include_dirs})
     if(IS_ABSOLUTE ${idir} AND IS_DIRECTORY ${idir})
       set(include ${idir})
@@ -139,7 +139,7 @@ foreach(t ${iwaki_EXPORTED_TARGETS})
   endif()
 endforeach()
 
-set(depends "")
+set(depends "message_runtime;roscpp;rospy;std_msgs")
 foreach(depend ${depends})
   string(REPLACE " " ";" depend_list ${depend})
   # the package name of the dependency must be kept in a unique variable so that it is not overwritten in recursive calls

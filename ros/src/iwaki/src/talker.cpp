@@ -70,7 +70,17 @@ int main(int argc, char **argv)
     
     iwaki::ActionMsg anAction;
 
-    anAction.id = 1;
+    iwaki::ArgSlot anArgSlot1;
+    anArgSlot1.name = "var1";
+    anArgSlot1.value = "val1";
+
+    iwaki::ArgSlot anArgSlot2;
+    anArgSlot2.name = "var2";
+    anArgSlot2.value = "val2";
+
+    anAction.args.push_back(anArgSlot1);
+    anAction.args.push_back(anArgSlot2);
+    anAction.id = count;
 
     ROS_INFO("%d", anAction.id);
     

@@ -73,10 +73,10 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(iwakisi src/iwakisi.cpp)
-target_link_libraries(iwakisi ${catkin_LIBRARIES})
+add_executable(iwakishi src/iwakishi.cpp)
+target_link_libraries(iwakishi ${catkin_LIBRARIES})
 
-add_dependencies(iwakisi iwaki_generate_messages_cpp)
+add_dependencies(iwakishi iwaki_generate_messages_cpp)
 
 ## Declare a cpp library
 # add_library(iwaki

@@ -31,7 +31,7 @@
 
 #include <iostream>
 #include <sstream>
-#include "iwakisi.h"
+#include "iwakishi.h"
 #include "log.h"
 #include <string>
 #include <csignal>

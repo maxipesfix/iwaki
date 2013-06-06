@@ -73,10 +73,10 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(talker src/talker.cpp)
-target_link_libraries(talker ${catkin_LIBRARIES})
+add_executable(iwakisi src/iwakisi.cpp)
+target_link_libraries(iwakisi ${catkin_LIBRARIES})
 
-add_dependencies(talker iwaki_generate_messages_cpp)
+add_dependencies(iwakisi iwaki_generate_messages_cpp)
 
 ## Declare a cpp library
 # add_library(iwaki

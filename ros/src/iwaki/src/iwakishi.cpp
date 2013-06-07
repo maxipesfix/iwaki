@@ -51,6 +51,43 @@
 
 #include <sstream>
 
+
+
+/**
+ * GLOBALS
+ * */
+
+InteractionManager im;
+TextUI textUI;
+
+#define KB_ENTER int('\n')
+
+/*
+ * Process the output Action queue.
+ * */
+
+void dispatchActionsFromOutputQueue() {
+
+    std::list<Action>::iterator action_it = im.output_queue.begin();
+
+    FILE_LOG(logDEBUG4) << "Action queue has length: " <<
+        im.output_queue.size();
+    while( action_it != im.output_queue.end() ) {
+            /* hndAction:
+             * here we dispatch the action from the queue.
+             * Generally, since an action can take time longer than allowed
+             * for the tick of the main loop,
+             * hndAction and hndActionCompletionStatus
+             * should be done asynchronously from this process. */
+        ActionStatus astat;
+            //hndAction(*action_it, astat);      
+        action_it++;
+        im.output_queue.pop_front();
+    }
+}
+
+
+
 /**
  * This tutorial demonstrates simple sending of messages over the ROS system.
  */

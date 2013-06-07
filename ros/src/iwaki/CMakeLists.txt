@@ -67,6 +67,14 @@ catkin_package(
 ## Build ##
 ###########
 
+## custom for iwaki
+set(RE2_LIBRARY "/usr/local/lib/libre2.a")
+set(RE2_INCLUDE_PATH "/usr/local/include/re2")
+find_package (Threads)
+
+set(CURSES_USE_NCURSES TRUE)
+find_package(Curses)
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(include
@@ -74,7 +82,7 @@ include_directories(include
 )
 
 add_executable(iwakishi src/iwakishi.cpp)
-target_link_libraries(iwakishi ${catkin_LIBRARIES})
+target_link_libraries(iwakishi ${catkin_LIBRARIES} iwaki queueio ${RE2_LIBRARY} ${CURSES_LIBRARY})
 
 add_dependencies(iwakishi iwaki_generate_messages_cpp)
 

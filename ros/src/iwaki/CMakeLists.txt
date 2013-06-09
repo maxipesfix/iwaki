@@ -81,7 +81,7 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(iwakishi src/iwakishi.cpp)
+add_executable(iwakishi src/iwakishi.cpp src/text_ui.cpp)
 target_link_libraries(iwakishi ${catkin_LIBRARIES} iwaki queueio ${RE2_LIBRARY} ${CURSES_LIBRARY})
 
 add_dependencies(iwakishi iwaki_generate_messages_cpp)

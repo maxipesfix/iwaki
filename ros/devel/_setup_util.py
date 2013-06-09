@@ -42,7 +42,7 @@ import platform
 import sys
 
 # environment at generation time
-CMAKE_PREFIX_PATH = '/home/maxim/h/iwaki/ros/devel;/opt/ros/groovy'.split(';')
+CMAKE_PREFIX_PATH = '/opt/ros/groovy'.split(';')
 setup_dir = '/home/maxim/h/iwaki/ros/devel'
 if setup_dir not in CMAKE_PREFIX_PATH:
     CMAKE_PREFIX_PATH.insert(0, setup_dir)

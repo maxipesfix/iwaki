@@ -49,6 +49,7 @@
 #include "std_msgs/String.h"
 #include "iwaki/ActionMsg.h"
 #include "iwaki/AtomMsg.h"
+#include "iwaki/ActionStatusMsg.h"
 
 #include <sstream>
 
@@ -62,6 +63,42 @@ InteractionManager im;
 TextUI textUI;
 
 #define KB_ENTER int('\n')
+
+ActionStatus convertActionStatusMsgToActionStatus(const iwaki::ActionStatusMsg
+                                                  &anActionStatusMsg) {
+    ActionStatus newActionStatus;
+    for (std::vector<iwaki::ArgSlot>::const_iterator argslot_it =
+             anActionStatusMsg.return_args.begin();
+         argslot_it != anActionStatusMsg.return_args.end(); argslot_it++) {
+        ArgSlot anArgSlot;
+        anArgSlot.name = argslot_it->name;
+        anArgSlot.value = argslot_it->value;
+        anArgSlot.default_value = argslot_it->default_value;
+        anArgSlot.type = argslot_it->type;
+        anArgSlot.unit = argslot_it->unit;
+        anArgSlot.var = argslot_it->var;
+
+        newActionStatus.return_args.push_back(anArgSlot);
+    }
+
+    newActionStatus.action_id = anActionStatusMsg.action_id;
+    newActionStatus.executor = anActionStatusMsg.executor;
+    newActionStatus.status = anActionStatusMsg.status;
+    return newActionStatus;
+}
+
+
+/*
+ * inputAtomCallback implements the callback on the subscribed topic,
+ * the inputs to the Iwakishi interaction manager.
+ * */
+
+void actionStatusCallback(const iwaki::ActionStatusMsg::ConstPtr& anActionStatusMsg_p) {
+    ActionStatus newActionStatus = convertActionStatusMsgToActionStatus(*anActionStatusMsg_p);
+       
+}
+
+
 
 Atom convertAtomMsgToAtom(const iwaki::AtomMsg &anAtomMsg) {
     Atom new_atom;
@@ -407,11 +444,9 @@ Usage: imcore [OPTION]... \n\
       /* ROS stuff */
   
   ros::NodeHandle n;
-
   ros::Publisher action_pub = n.advertise<iwaki::ActionMsg>("IwakiAction", 1000);
-
   ros::Subscriber atom_sub = n.subscribe("IwakiInputAtoms", 1000, inputAtomCallback);
-
+  ros::Subscriber actionStatus_sub = n.subscribe("IwakiActionStatus", 1000, actionStatusCallback);
 
       //ros::Rate loop_rate(10); /* we handle timing by ourselves */
       /******************************

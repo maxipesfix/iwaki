@@ -55,20 +55,34 @@ void publishBufferAtom(string &kb_buffer,  ros::Publisher &atom_pub) {
 
     v1.name = "type";
     v1.val = "im";
+    v1.relation = "equal";
+    v1.type = "string";
     v1.unique_mask = true;
 
     v2.name = "subtype";
     v2.val = "user";
+    v2.relation = "equal";
+    v2.type = "string";
     v2.unique_mask = true;
 	
     v3.name = "uu_unhandled";
     v3.val = "true";
-
+    v3.relation = "equal";
+    v3.type = "string";
+    v3.unique_mask = false;
+    
     v4.name = "uu_string";
     v4.val = kb_buffer;
+    v4.relation = "equal";
+    v4.type = "string";
+    v4.unique_mask = false;
 
     v5.name = "id";
     v5.val = "1";
+    v5.relation = "equal";
+    v5.type = "string";
+    v5.unique_mask = false;
+
     
     newAtomMsg.varslots.push_back(v1);
     newAtomMsg.varslots.push_back(v2);

@@ -113,7 +113,7 @@ string makeSnippetFromAtom(Atom anAtom) {
 
 Atom convertAtomMsgToAtom(const iwaki::AtomMsg &anAtomMsg) {
     Atom new_atom;
-        /* convert the varslots*/
+        /* convert the varslots */
     for (std::vector<iwaki::VarSlot>::const_iterator varslot_it = anAtomMsg.varslots.begin();
          varslot_it != anAtomMsg.varslots.end(); varslot_it++) {
         VarSlot newVarSlot;

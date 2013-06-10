@@ -48,6 +48,7 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "iwaki/ActionMsg.h"
+#include "iwaki/AtomMsg.h"
 
 #include <sstream>
 
@@ -61,6 +62,36 @@ InteractionManager im;
 TextUI textUI;
 
 #define KB_ENTER int('\n')
+
+Atom convertAtomMsgToAtom(const iwaki::AtomMsg &anAtomMsg) {
+    Atom new_atom;
+        /* convert the varslots*/
+    for (std::vector<iwaki::VarSlot>::const_iterator varslot_it = anAtomMsg.varslots.begin();
+         varslot_it != anAtomMsg.varslots.end(); varslot_it++) {
+        VarSlot newVarSlot;
+        newVarSlot.name = varslot_it->name;
+        newVarSlot.val = varslot_it->val;
+        newVarSlot.relation = varslot_it->relation;
+        newVarSlot.type = varslot_it->type;
+        newVarSlot.unique_mask = varslot_it->unique_mask;
+
+        new_atom.varslots.push_back(newVarSlot);
+    }
+    return new_atom;
+}
+
+
+/*
+ * inputAtomCallback implements the callback on the subscribed topic,
+ * the inputs to the Iwakishi interaction manager.
+ * */
+
+void inputAtomCallback(const iwaki::AtomMsg::ConstPtr& anAtomMsg_p) {
+    Atom new_atom = convertAtomMsgToAtom(*anAtomMsg_p);
+    im.input_queue.push_back(new_atom);
+       
+}
+
 
 
 iwaki::ActionMsg convertActionToActionMsg(Action &anAction) {
@@ -199,7 +230,7 @@ int main(int argc, char **argv)
    * part of the ROS system.
    */
     
-  ros::init(argc, argv, "iwakisi");
+  ros::init(argc, argv, "iwakishi");
 
       /* do our own parsing of argument line */
   opterr = 0;
@@ -372,11 +403,15 @@ Usage: imcore [OPTION]... \n\
   
   FILE_LOG(logINFO) << "Running timer with the period of " <<
       timer_period_microsec << " microseconds." << endl;
-  
+
+      /* ROS stuff */
   
   ros::NodeHandle n;
 
   ros::Publisher action_pub = n.advertise<iwaki::ActionMsg>("IwakiAction", 1000);
+
+  ros::Subscriber atom_sub = n.subscribe("IwakiInputAtoms", 1000, inputAtomCallback);
+
 
       //ros::Rate loop_rate(10); /* we handle timing by ourselves */
       /******************************

@@ -83,8 +83,11 @@ include_directories(include
 
 add_executable(iwakishi src/iwakishi.cpp src/text_ui.cpp)
 target_link_libraries(iwakishi ${catkin_LIBRARIES} iwaki queueio ${RE2_LIBRARY} ${CURSES_LIBRARY})
-
 add_dependencies(iwakishi iwaki_generate_messages_cpp)
+
+add_executable(console src/console.cpp)
+target_link_libraries(console ${catkin_LIBRARIES} ${CURSES_LIBRARY})
+add_dependencies(console iwaki_generate_messages_cpp)
 
 ## Declare a cpp library
 # add_library(iwaki

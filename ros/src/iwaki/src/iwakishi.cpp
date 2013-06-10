@@ -1,16 +1,15 @@
 /*****************************************************************************
  * PROJECT: iwaki
  *
- * FILE: iwakisi.cc
+ * FILE: iwakishi.cpp
  *
  * ABSTRACT: This is a ROS wrapper around Iwaki interaction manager library.
  *
  * EXAMPLE COMMAND LINE ARGUMENTS:  -t 0.1 -d DEBUG4 -l log1
  *                       -p PROJECTDIR/soundboard/scripts
- *                       -i initialize_im.georgi.xml
- *                       -s PROJECTDIR/soundboard/sounds -x
+ *                       -i initialize_im.georgi.xml -x
  *
- * Iwakisi: a ROS wrapper around Iwaki interaction manager library.
+ * Iwakishi: a ROS wrapper around Iwaki interaction manager library.
  * Copyright (C) 2012-2013 Maxim Makatchev.
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -95,10 +94,22 @@ ActionStatus convertActionStatusMsgToActionStatus(const iwaki::ActionStatusMsg
 
 void actionStatusCallback(const iwaki::ActionStatusMsg::ConstPtr& anActionStatusMsg_p) {
     ActionStatus newActionStatus = convertActionStatusMsgToActionStatus(*anActionStatusMsg_p);
-       
+    im.processActionCompletionStatus(newActionStatus);
 }
 
 
+
+string makeSnippetFromAtom(Atom anAtom) {
+    string snippet;
+    
+    for (std::list<VarSlot>::iterator varslot_it = anAtom.varslots.begin();
+         varslot_it != anAtom.varslots.end(); varslot_it++) {
+        if (varslot_it->name == "uu_string") {
+            snippet += varslot_it->val;
+        }
+    }
+    return snippet;
+}
 
 Atom convertAtomMsgToAtom(const iwaki::AtomMsg &anAtomMsg) {
     Atom new_atom;
@@ -124,7 +135,8 @@ Atom convertAtomMsgToAtom(const iwaki::AtomMsg &anAtomMsg) {
  * */
 
 void inputAtomCallback(const iwaki::AtomMsg::ConstPtr& anAtomMsg_p) {
-    Atom new_atom = convertAtomMsgToAtom(*anAtomMsg_p);
+    Atom new_atom = convertAtomMsgToAtom(*anAtomMsg_p);   
+    textUI.push_msg("INFO: received message: " + makeSnippetFromAtom(new_atom));
     im.input_queue.push_back(new_atom);
        
 }

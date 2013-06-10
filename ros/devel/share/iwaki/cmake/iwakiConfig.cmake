@@ -108,7 +108,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/maxim/h/iwaki/ros/devel/lib;/opt/ros/groovy/lib)
+    foreach(path /home/maxim/h/iwaki/ros/devel/lib;/home/maxim/h/iwaki/ros/devel/lib;/opt/ros/groovy/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

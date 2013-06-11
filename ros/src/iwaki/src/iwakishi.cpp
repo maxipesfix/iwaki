@@ -267,18 +267,7 @@ int main(int argc, char **argv)
     int ch;             /* char for runtime keyboard input */
     string kb_buffer;   /* the keyboard buffer master copy */
 
-    
-  /**
-   * The ros::init() function needs to see argc and argv so that it can perform
-   * any ROS arguments and name remapping that were provided at the command line. For programmatic
-   * remappings you can use a different version of init() which takes remappings
-   * directly, but for most command-line programs, passing argc and argv is the easiest
-   * way to do it.  The third argument to init() is the name of the node.
-   *
-   * You must call one of the versions of ros::init() before using any other
-   * part of the ROS system.
-   */
-    
+        /* initializing ROS and parsing ROS args before app's args */
   ros::init(argc, argv, "iwakishi");
 
       /* do our own parsing of argument line */
@@ -457,7 +446,7 @@ Usage: imcore [OPTION]... \n\
   
   ros::NodeHandle n;
   ros::Publisher action_pub = n.advertise<iwaki::ActionMsg>("IwakiAction", 1000);
-  ros::Subscriber atom_sub = n.subscribe("IwakiInputAtoms", 1000, inputAtomCallback);
+  ros::Subscriber atom_sub = n.subscribe("IwakiInputAtom", 1000, inputAtomCallback);
   ros::Subscriber actionStatus_sub = n.subscribe("IwakiActionStatus", 1000, actionStatusCallback);
 
       //ros::Rate loop_rate(10); /* we handle timing by ourselves */

@@ -36,7 +36,6 @@
 #include "ros/ros.h"
 #include "iwaki/AtomMsg.h"
 
-//using namespace std;
 using std::string;
 using std::iostream;
 
@@ -188,7 +187,7 @@ int main(int argc, char **argv) {
 
       /* ROS stuff */
     ros::NodeHandle n;
-    ros::Publisher atom_pub = n.advertise<iwaki::AtomMsg>("IwakiInputAtoms", 1000);
+    ros::Publisher atom_pub = n.advertise<iwaki::AtomMsg>("IwakiInputAtom", 1000);
         /******************************
          *
          * Main loop

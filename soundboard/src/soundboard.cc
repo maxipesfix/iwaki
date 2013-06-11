@@ -176,9 +176,9 @@ int main (int argc, char **argv)
 {       /* parse argument line */
     opterr = 0;
     char* cvalue;
-    std::string logfile_name;
+    string logfile_name;
     bool text_ui = false;
-    std::string debug_level;
+    string debug_level;
     unsigned int timer_period_microsec = 1000000;
     int c;
     UICommand ui_command;

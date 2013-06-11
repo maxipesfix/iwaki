@@ -89,6 +89,12 @@ add_executable(console src/console.cpp)
 target_link_libraries(console ${catkin_LIBRARIES} ${CURSES_LIBRARY})
 add_dependencies(console iwaki_generate_messages_cpp)
 
+add_executable(generator src/generator.cpp)
+target_link_libraries(generator ${catkin_LIBRARIES})
+add_dependencies(generator iwaki_generate_messages_cpp)
+
+
+
 ## Declare a cpp library
 # add_library(iwaki
 #   src/${PROJECT_NAME}/iwaki.cpp

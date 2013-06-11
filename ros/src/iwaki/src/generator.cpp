@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <string>
-
+#include <fstream>
 
 #include "ros/ros.h"
 #include "iwaki/ActionMsg.h"
@@ -51,7 +51,59 @@ string sounds_path;
 ros::Publisher actionStatus_pub;
 
 bool executeAction(const iwaki::ActionMsg &anActionMsg) {
+    string full_filename;
+    
+        /* in the future generate may handle other actions, perhaps */
+    if (anActionMsg.name == "generate_utterance") {
+        string utterance_file;
+        string utterance_token;
+        string utterance_string;
+        
+            /* get the args*/
+        for (std::vector<iwaki::ArgSlot>::const_iterator arg_it = anActionMsg.args.begin();
+             arg_it != anActionMsg.args.end(); arg_it++) {
+             cout  << "  arg name: " << arg_it->name << endl;
+             cout  << "  arg value: " << arg_it->value << endl;
+             cout  << "  arg type: " << arg_it->type << endl;
+            if (arg_it->name == "utterance_file") {
+                utterance_file = arg_it->value;
+            } else if (arg_it->name == "utterance_token") {
+                utterance_token = arg_it->value;
+            } else if (arg_it->name == "utterance_string") {
+                utterance_string = arg_it->value;
+            }
+        }
 
+        if (utterance_file != "_NO_VALUE_") {
+                /* action included utterance file, ignore the rest */
+
+
+            full_filename = sounds_path + "/" + utterance_file;
+
+            ifstream sound_file(full_filename.c_str());
+            
+            if ( !sound_file)
+            {
+                cout << "Can't find sound file:" << full_filename << endl;
+                return false;
+            }
+                /* using & to run gstreamer as a new processes to allow for
+                 * asychnronous execution. -q quiets it although this
+                 * doesn't prevent it with messing text_ui without &. */
+            string exec_str = "gst-launch-0.10 -q playbin uri=file://" +
+                full_filename + " &";
+            const char *exec_cstr = (const char*)exec_str.c_str();
+            int res = system(exec_cstr);
+
+           
+                
+            cout  << "System() returned value: " << res
+                  << " when asked to execute command: " << exec_str << endl;
+        }
+    } else {
+        cout << "Don't know what to do with the action named: " << anActionMsg.name
+             << endl;
+    }
     return true;
 }
 
@@ -86,7 +138,7 @@ void actionCallback(const iwaki::ActionMsg::ConstPtr& anActionMsg_p) {
 
     actionStatus_pub.publish(aStatusMsg);
     cout << "Generator sent status completed for action id: "
-         << anActionMsg_p->id << cout;
+         << anActionMsg_p->id << endl;
     return;
 
 }
@@ -120,7 +172,7 @@ int main (int argc, char **argv)
             /* getopt_long stores the option index here. */
         int option_index = 0;
         
-        c = getopt_long (argc, argv, "hl:d:s:",
+        c = getopt_long (argc, argv, "hs:",
                          long_options, &option_index);
         
             /* Detect the end of the options. */
@@ -154,9 +206,10 @@ Usage: imcore [OPTION]... \n\
             {
                 cvalue = optarg;
                 sounds_path = (string) ((const char*) cvalue);
+                break;
             }   
             default:
-                 cout << "Unknown option. Try 'imcore --help' for more information.\n";
+                 cout << "Unknown option. Try 'generator --help' for more information.\n";
                  return -1;
         }
     }
@@ -170,6 +223,10 @@ Usage: imcore [OPTION]... \n\
         putchar ('\n');
     }
 
+    if (sounds_path.empty()) {
+        cout << "Missing path to sounds directory. Pass it with a command line option -s."
+             << endl;
+    }
 
 
         /* ROS stuff */

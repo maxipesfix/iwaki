@@ -7,16 +7,19 @@ https://github.com/maxipesfix/iwaki
 ## ABOUT
 
 This is the distribution of the Iwaki interaction manager. It includes two relevant libraries:
+
+<pre>
 queueio.a
 iwaki.a
+</pre>
 
 and a sample application:
+
+<pre>
 soundboard
+</pre>
 
-A manual can be found in the
-PROJECTDIR/doc
-
-directory.
+A manual can be found in the PROJECTDIR/doc directory.
 
 
 

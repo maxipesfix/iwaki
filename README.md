@@ -3,9 +3,8 @@ Iwaki Interaction Manager
 
 https://github.com/maxipesfix/iwaki
  
-*******************
-* ABOUT
-*******************
+
+## ABOUT
 
 This is the distribution of the Iwaki interaction manager. It includes two relevant libraries:
 queueio.a
@@ -20,18 +19,18 @@ PROJECTDIR/doc
 directory.
 
 
-*******************
-* PREREQUISITES
-*******************
+
+## PREREQUISITES
+
 
 * RE2 regular expression library: http://code.google.com/p/re2/
 * Additionally, to run the Soundboard app, you will need to install 
   * ncurses 
   * gstreamer (ubuntu package gstreamer0.10-tools)
 
-*******************
-* TO INSTALL on Linux
-*******************
+
+## TO INSTALL on Linux
+
 
 Make sure that CMakeLists.txt in this directory includes the correct location
 of your RE2 library and header files.
@@ -73,9 +72,9 @@ where PROJECTDIR is the absolute path to the root of the iwaki installation tree
 For more details on soundboard app, refer to README inside iwaki/soundboard/ directory.
 
 
-*******************
-* LICENSE
-*******************
+
+## LICENSE
+
 
 
 Iwaki Interaction Manager

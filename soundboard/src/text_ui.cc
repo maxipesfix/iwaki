@@ -32,7 +32,7 @@
 #include <string>
 
 #include <locale.h>
-#include <ncursesw/ncurses.h>
+#include <ncurses.h>
 
 #define KEY_SMALL_Q 113
 #define KEY_SMALL_V 118

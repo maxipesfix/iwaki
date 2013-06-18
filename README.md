@@ -80,12 +80,12 @@ For more details on soundboard app, refer to README inside iwaki/soundboard/ dir
 
 
 
-Iwaki Interaction Manager.
+###Iwaki Interaction Manager.
 
 Copyright (C) 2012-2013 Maxim Makatchev, Reid Simmons, Carnegie Mellon University.
 
 
-Soundboard: play sounds in response to keyboard according to Iwaki scripts.
+###Soundboard: play sounds in response to keyboard according to Iwaki scripts.
 
 Copyright (C) 2012-2013 Maxim Makatchev.
 

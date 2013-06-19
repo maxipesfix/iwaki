@@ -39,7 +39,7 @@ It contains recipes to demonstrate some capabilities of Iwaki interaction manage
 
 ## How does it do it?
 
-Soundboard app loads the recipes specified in `initialize.georgi.xml` and triggers them when their preconditions match the system's state. In this case, it's time for `heartbeat` recipe and the user input string for the others. The recipes, once triggered, execute their bodies, that contain `assignments`, `actions`, or `goals` to satisfy. The actions in these examples play sound files: .ogg files on Linux plaform, or .mp3 on Mac OS X (since preinstalled on OS X `afplay` does not handle .ogg files). 
+Soundboard app interfaces with Iwaki library which loads the recipes specified in `initialize.georgi.xml` and triggers them when their preconditions match the system's state. In this case, it's time for `heartbeat` recipe and the user input string for the others. The recipes, once triggered, execute their bodies, that contain `assignments`, `actions`, or `goals` to satisfy. The actions in these examples play sound files: .ogg files on Linux plaform, or .mp3 on Mac OS X (since preinstalled on OS X `afplay` does not handle .ogg files). 
 
 For more details on the functioning of the Iwaki interaction manager refer to the manual in the `iwaki/doc/` folder.
 

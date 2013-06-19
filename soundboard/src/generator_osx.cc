@@ -69,7 +69,7 @@ bool executeAction(Action &an_action) {
         if (utterance_file != "_NO_VALUE_") {
                 /* action included utterance file, ignore the rest */
 
-            full_filename = sounds_path + "/" + utterance_file;
+            full_filename = sounds_path + "/" + utterance_file + ".mp3";
 
             ifstream sound_file(full_filename.c_str());
             
@@ -81,7 +81,7 @@ bool executeAction(Action &an_action) {
                 /* afplay doesn't handle ogg out of the box, so,
 		 * need to use mp3 or wav, for example. */
             string exec_str = "afplay " +
-                full_filename + ".mp3" + " &";
+                full_filename + " &";
             const char *exec_cstr = (const char*)exec_str.c_str();
             int res = system(exec_cstr);
                 

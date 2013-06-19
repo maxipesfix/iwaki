@@ -29,10 +29,11 @@ A manual can be found in the PROJECTDIR/doc directory.
 * RE2 regular expression library: http://code.google.com/p/re2/
 * Additionally, to run the Soundboard app, you will need to install 
   * ncurses 
-  * gstreamer (ubuntu package gstreamer0.10-tools)
+  * on Linux, gstreamer (on ubuntu it is the package `gstreamer0.10-tools`).
+  * on Max OS X, nothing (Soundboard uses preinstalled `afplay`, which doesn't play ogg audio)
 
 
-## TO INSTALL on Linux
+## TO INSTALL on Linux or Mac OS X
 
 
 Make sure that CMakeLists.txt in this directory includes the correct location
@@ -57,7 +58,7 @@ PROJECTDIR/build/soundboard/bin/ .
 Issuing 
 
 <pre>
-sudo make install 
+make install 
 </pre>
 
 moves header files and static libraries to /usr/local/include/ and usr/local/lib/ 

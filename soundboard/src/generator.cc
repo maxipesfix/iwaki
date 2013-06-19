@@ -69,7 +69,7 @@ bool executeAction(Action &an_action) {
         if (utterance_file != "_NO_VALUE_") {
                 /* action included utterance file, ignore the rest */
 
-            full_filename = sounds_path + "/" + utterance_file;
+            full_filename = sounds_path + "/" + utterance_file + ".ogg";
 
             ifstream sound_file(full_filename.c_str());
             
@@ -82,7 +82,7 @@ bool executeAction(Action &an_action) {
                  * asychnronous execution. -q quiets it although this
                  * doesn't prevent it with messing text_ui without &. */
             string exec_str = "gst-launch-0.10 -q playbin uri=file://" +
-                full_filename + ".ogg" + " &";
+                full_filename + " &";
             const char *exec_cstr = (const char*)exec_str.c_str();
             int res = system(exec_cstr);
                 

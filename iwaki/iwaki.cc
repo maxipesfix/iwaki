@@ -2465,7 +2465,7 @@ void InteractionManager::tryBackchain() {
                     FILE_LOG(logDEBUG4) << "Backchaining on goal failed.";
                     node->ae_status = "pending";
                 } else if (status == "completed") {
-                    node->ae_status == "completed";
+                    node->ae_status = "completed";
                 }
             }
         }

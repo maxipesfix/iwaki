@@ -82,7 +82,7 @@ bool executeAction(Action &an_action) {
                  * asychnronous execution. -q quiets it although this
                  * doesn't prevent it with messing text_ui without &. */
             string exec_str = "gst-launch-0.10 -q playbin uri=file://" +
-                full_filename + " &";
+                full_filename + ".ogg" + " &";
             const char *exec_cstr = (const char*)exec_str.c_str();
             int res = system(exec_cstr);
                 

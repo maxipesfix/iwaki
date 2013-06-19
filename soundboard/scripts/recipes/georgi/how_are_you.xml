@@ -31,13 +31,13 @@
         <!-- outcome 1 -->
         <roboml:random_outcome p="0.5">
           <roboml:args>
-            <arg name="utterance_file" value="georgi/getting_it_done.ogg" type="string"/>
+            <arg name="utterance_file" value="georgi/getting_it_done" type="string"/>
           </roboml:args>
         </roboml:random_outcome>
         <!-- outcome 2 -->
         <roboml:random_outcome p="0.5">
           <roboml:args>
-            <arg name="utterance_file" value="georgi/living_a_dream_clean.ogg" type="string"/>
+            <arg name="utterance_file" value="georgi/living_a_dream_clean" type="string"/>
           </roboml:args>
         </roboml:random_outcome>
       </roboml:random>

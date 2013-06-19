@@ -27,7 +27,7 @@
 
     <action name="generate_utterance" actor="generator" action_space="speech">
       <roboml:args>
-        <arg name="utterance_file" value="georgi/good_and_you.ogg" type="string"/>
+        <arg name="utterance_file" value="georgi/good_and_you" type="string"/>
       </roboml:args>
     </action>
 
@@ -93,7 +93,7 @@
 
     <action name="generate_utterance" actor="generator" action_space="speech">
       <roboml:args>
-        <arg name="utterance_file" value="georgi/thats_good_thats_good.ogg" type="string"/>
+        <arg name="utterance_file" value="georgi/thats_good_thats_good" type="string"/>
       </roboml:args>
     </action>
 
@@ -145,7 +145,7 @@
 
     <action name="generate_utterance" actor="generator" action_space="speech">
       <roboml:args>
-        <arg name="utterance_file" value="georgi/keep_it_up_man.ogg" type="string"/>
+        <arg name="utterance_file" value="georgi/keep_it_up_man" type="string"/>
       </roboml:args>
     </action>
 

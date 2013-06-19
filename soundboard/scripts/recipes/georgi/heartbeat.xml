@@ -30,7 +30,7 @@
 
     <action name="generate_utterance" actor="generator" action_space="speech">
       <roboml:args>
-        <arg name="utterance_file" value="georgi/heartbeat.ogg" type="string"/>
+        <arg name="utterance_file" value="georgi/heartbeat" type="string"/>
       </roboml:args>
     </action>
     

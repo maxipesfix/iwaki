@@ -19,7 +19,7 @@ soundboard
  -x
 </pre>
 
-For example, from the ~/h/iwaki/build directory on my computer I type:
+For example, from the `~/h/iwaki/build` directory on my computer I type:
 <pre>
 ./soundboard/bin/soundboard -t 0.1 -d DEBUG4 -l ./log1 -p ~/h/iwaki/soundboard/scripts -i initialize_im.georgi.xml -s ~/h/iwaki/soundboard/sounds -x
 </pre>

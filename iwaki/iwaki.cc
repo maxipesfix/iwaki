@@ -2056,11 +2056,11 @@ bool InteractionManager::executeAssignment(BodyElement &element1, Conjunction &b
             if (!this->updateAtomBinding(*atom1)) {
                 FILE_LOG(logERROR) << "IM error: failed to update root bindings.";
             }
-                /*TODO: update local bindings too! (or maybe they are updated
-                 * when whileconditions are checked... check it out!)
-                 * DO we need it though, because this can also invalidate preconditions.
-                 * We can already invalidate whilecondition within the same recipe
-                 * without the need of updating local bindings though. */
+                /* NOTE: we need to update the local bindings again, because the
+                 * next assignment in the block may rely on the modified local vars.
+                 * Of course, this can also invalidate preconditions, which is OK,
+                 * since we only check them once when the atom is loaded. */
+             bindings.updateBinding(*gBindings);
         }
     }
     return true;

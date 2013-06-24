@@ -343,6 +343,13 @@ Usage: imcore [OPTION]... \n\
         FILELog::FromString(debug_level.empty() ? "DEBUG1" : debug_level);
 
 
+    /* Verify that the command line args were passed */
+    if (sounds_path.empty()) {
+      cout << "ERROR: Don't know where sound files are." << endl; 
+      cout << "       Use -s option to pass the absolute path to the sound file directory."  << endl;
+      return -1;
+    }
+    
         /* set IM params */
     im.timer_period_microsec = timer_period_microsec;
     

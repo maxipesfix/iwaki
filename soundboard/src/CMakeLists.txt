@@ -13,3 +13,5 @@ else ()
    add_executable(soundboard soundboard.cc text_ui.cc generator.cc soundboard.h)
 endif ()
 target_link_libraries(soundboard iwaki queueio ${RE2_LIBRARY} ${CURSES_LIBRARY} )
+
+install (TARGETS soundboard DESTINATION bin)

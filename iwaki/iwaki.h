@@ -72,8 +72,20 @@ class TriggerableRecord {
 class VarSlot {
   public:
     // default constructor
-    VarSlot(): relation("equal"), val("_NO_VALUE_"), type("string"), unique_mask(false),
-        re_p(NULL){}
+    VarSlot(): relation("equal"), val("_NO_VALUE_"), type("string"),
+      unique_mask(false), re_p(NULL){}
+    VarSlot(string name, string val): name(name), relation("equal"), val(val),
+      type("string"), unique_mask(false), re_p(NULL){}
+    VarSlot(string name, int val): name(name), relation("equal"),
+      val(to_string(val)), type("number"), unique_mask(false), re_p(NULL){}
+    VarSlot(string name, double val): name(name), relation("equal"),
+      val(to_string(val)), type("number"), unique_mask(false), re_p(NULL){}
+    VarSlot(string name, bool val): name(name), relation("equal"),
+      val(val ? "true" : "false"), type("string"), unique_mask(false),
+      re_p(NULL){}
+    VarSlot(string name, string val, bool unique_mask): name(name),
+      relation("equal"), val(val), type("string"), unique_mask(unique_mask),
+      re_p(NULL){}
     bool load(TiXmlElement* pElem);
     void print();
     void print(TLogLevel log_level);

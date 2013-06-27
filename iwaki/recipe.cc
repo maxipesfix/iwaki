@@ -37,7 +37,6 @@
 
 #include <math.h>
 
-
 //using namespace std;
 using std::string;
 using std::iostream;
@@ -153,7 +152,6 @@ BodyElement BodyElement::derandomize(string recipe_name, unsigned int active_ele
     
     p = this->element_probs[0];
                                      
-    srand((unsigned)time(NULL));                            /* initialize random gen */
     double rseed = ((double)rand()/(double)RAND_MAX);
     FILE_LOG(logDEBUG3) << "rseed: " << rseed;
 

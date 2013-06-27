@@ -661,7 +661,6 @@ bool ExpressionParser::evalFunctionOrOperator( pair<string, TermType> &op_type_p
                 getValue((arg_dq.end()-2)->first) :  (arg_dq.end()-2)->first;
             string arg2 = ((arg_dq.end()-1)->second == VARIABLE) ?
                 getValue((arg_dq.end()-1)->first) :  (arg_dq.end()-1)->first;
-            srand((unsigned)time(NULL));             /* initialize random gen */
             double rseed = ((double)rand()/(double)RAND_MAX);
             rseed = string_to_double(arg1) +
                 rseed * (string_to_double(arg2)-string_to_double(arg1));
@@ -671,7 +670,6 @@ bool ExpressionParser::evalFunctionOrOperator( pair<string, TermType> &op_type_p
                 getValue((arg_dq.end()-2)->first) :  (arg_dq.end()-2)->first;
             string arg2 = ((arg_dq.end()-1)->second == VARIABLE) ?
                 getValue((arg_dq.end()-1)->first) :  (arg_dq.end()-1)->first;
-            srand((unsigned)time(NULL));             /* initialize random gen */
             double rseed = ((double)rand()/(double)RAND_MAX);
             rseed = string_to_double(arg1) +
                 rseed * (string_to_double(arg2)-string_to_double(arg1));

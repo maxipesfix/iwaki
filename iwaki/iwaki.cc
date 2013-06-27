@@ -1056,6 +1056,8 @@ bool InteractionManager::preprocess() {
 bool InteractionManager::initialize() {
     bool res = true;
 
+    srand((unsigned)time(NULL));    /* initialize random gen */
+    
         /* if present command line init file name overrides the default */
     if (this->init_file_name.empty()) {
         this->init_file_name = IM_INIT_FILENAME;

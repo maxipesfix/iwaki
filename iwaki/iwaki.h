@@ -76,9 +76,11 @@ class VarSlot {
       unique_mask(false), re_p(NULL){}
     VarSlot(string name, string val): name(name), relation("equal"), val(val),
       type("string"), unique_mask(false), re_p(NULL){}
-    VarSlot(string name, int val): name(name), relation("equal"),
+    VarSlot(string name, const char *val): name(name), relation("equal"),
+      val((string)val), type("string"), unique_mask(false), re_p(NULL){}
+    VarSlot(string name, int val): name(name), relation("="),
       val(to_string(val)), type("number"), unique_mask(false), re_p(NULL){}
-    VarSlot(string name, double val): name(name), relation("equal"),
+    VarSlot(string name, double val): name(name), relation("="),
       val(to_string(val)), type("number"), unique_mask(false), re_p(NULL){}
     VarSlot(string name, bool val): name(name), relation("equal"),
       val(val ? "true" : "false"), type("string"), unique_mask(false),

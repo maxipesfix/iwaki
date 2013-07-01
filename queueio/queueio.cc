@@ -32,14 +32,25 @@
 #include <algorithm>
 #include <vector>
 
-#include <sys/time.h>
-#include <unistd.h>
+//#include <unistd.h>
 
 //#include "BoostIpc.h"
 
 using namespace std;
 using std::string;
 using std::iostream;
+
+
+#if defined(_MSC_VER) || defined(__MINGW32__)
+int gettimeofday(struct timeval* tp, void* tzp) {
+    DWORD t;
+    t = timeGetTime();
+    tp->tv_sec = t / 1000;
+    tp->tv_usec = t % 1000;
+    /* 0 indicates that the call succeeded. */
+    return 0;
+}
+#endif
 
 
 /* Just gets current system time in milliseconds */

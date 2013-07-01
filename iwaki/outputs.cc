@@ -31,9 +31,6 @@
 #include <string>
 #include <csignal>
 
-#include <sys/time.h>
-#include <unistd.h>
-
 #include <math.h>
 #ifndef M_PI
 #define M_PI 3.14159

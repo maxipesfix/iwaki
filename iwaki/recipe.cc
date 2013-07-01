@@ -32,9 +32,6 @@
 #include <string>
 #include <csignal>
 
-#include <sys/time.h>
-#include <unistd.h>
-
 #include <math.h>
 
 //using namespace std;

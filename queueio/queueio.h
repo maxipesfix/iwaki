@@ -58,6 +58,25 @@ ResourceProfile, Task and related classes for interfacing with the queue.
 #include <map>
 #include <list>
 
+/* time API for Windows compatibility */
+
+#define _TIMEVAL_DEFINED
+
+#if defined(_MSC_VER) || defined(__MINGW32__)
+#  include <time.h>
+#ifndef _TIMEVAL_DEFINED /* also in winsock[2].h */
+#define _TIMEVAL_DEFINED
+struct timeval {
+    long tv_sec;
+    long tv_usec;
+};
+#endif /* _TIMEVAL_DEFINED */
+#else
+#  include <sys/time.h>
+#endif
+
+
+
 // IF USING BOOST SERIALIZATION FOR IPC
 //   #include <boost/serialization/base_object.hpp>
 //   #include <boost/serialization/utility.hpp> 

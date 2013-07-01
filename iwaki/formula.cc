@@ -34,8 +34,6 @@
 //#include <Python.h>
 #include <csignal>
 
-#include <sys/time.h>
-#include <unistd.h>
 
 #include <math.h>
 #ifndef M_PI

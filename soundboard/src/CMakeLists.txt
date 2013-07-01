@@ -1,6 +1,11 @@
 #include_directories(${IWAKI_SOURCE_DIR}/soundboard)
 #link_directories(${IWAKI_BINARY_DIR}/soundboard)
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set(CURSES_LIBRARY "c:/MinGW/lib/libncursest.a")
+    set(CURSES_INCLUDE_PATH "c:/MinGW/include/ncursest")
+endif ()
+
 include_directories (${IWAKI_SOURCE_DIR}/queueio ${IWAKI_SOURCE_DIR}/iwaki ${CURSES_INCLUDE_PATH} ${RE2_INCLUDE_PATH}) 
 
 

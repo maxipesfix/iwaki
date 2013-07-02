@@ -24,7 +24,9 @@
 #ifndef NLPW_UTILS_H
 #define NLPW_UTILS_H
 
-//#define USE_RE2
+#ifndef __MINGW32__
+#define USE_RE2
+#endif
 
 #include <algorithm>
 #include <string>

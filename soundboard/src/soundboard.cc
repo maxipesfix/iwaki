@@ -39,10 +39,9 @@
 #include <algorithm>
 #include <ncurses.h> /* for getch() */
 
-#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
+#include "getopt.h"
      
 
 #include <math.h>
@@ -62,6 +61,22 @@ TextUI textUI;
 string sounds_path; /* path to the directory with sound files */
 
 #define KB_ENTER int('\n')
+
+/* 
+ * for Windows from http://filipivianna.blogspot.com/2010/07/usleep-on-windows-win32.html 
+ */
+#if defined(_MSC_VER) || defined(__MINGW32__)
+void usleep(int waitTime) {
+    __int64 time1 = 0, time2 = 0, freq = 0;
+
+    QueryPerformanceCounter((LARGE_INTEGER *) &time1);
+    QueryPerformanceFrequency((LARGE_INTEGER *)&freq);
+
+    do {
+        QueryPerformanceCounter((LARGE_INTEGER *) &time2);
+    } while((time2-time1) < waitTime);
+}
+#endif
 
 /*
  * Process the output Action queue.

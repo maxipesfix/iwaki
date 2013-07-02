@@ -79,7 +79,7 @@ bool VarSlot::load(TiXmlElement* pElem)
   if (pElem->Attribute("type")) {
     this->type = pElem->Attribute("type");
   }
-
+#ifdef USE_RE2
                              /* if relations involves RE matching, precompile regular
                               * expression, if there are no $-vars inside */
   if (isREFunction(this->relation) && (this->relation.find("$")==string::npos) &&
@@ -99,7 +99,7 @@ bool VarSlot::load(TiXmlElement* pElem)
       }
           //this->re_p = &re;
   }
-  
+#endif
   // cout << "Slot's name:"<< this->name << ", rel:"<< this->relation
   //   << ", val:"<< this->val << ", var:" << this->var <<endl;
   return loadOkay;
@@ -126,6 +126,8 @@ void VarSlot::printWithLabels() {
         "type: " << this->type;
 }
 
+
+#ifdef USE_RE2
 /*
  * val2 here is the global slot value, this->val is the value in the condition
  * */
@@ -152,7 +154,7 @@ bool VarSlot::evalRERelation(string &val2, string &val1, string &relation, strin
     
     return false;
 }
-
+#endif
 
 /*
  * val2 here is the global slot value, this->val is the value in the condition
@@ -173,7 +175,11 @@ bool VarSlot::evalStringRelation(string &val2, string &relation, string &type,
         /* evaluate expression in this-val (val1) if necessary */
     
     if ((prefix_ind != string::npos) || (fun_prefix_ind != string::npos)
-        || ((val1.find("\\") != string::npos) && (this->re_p == NULL))) {
+        || ((val1.find("\\") != string::npos) 
+#ifdef USE_RE2
+        && (this->re_p == NULL)
+#endif
+        )) {
             /* could do everything as while loop, but we want to quickly
              * eliminate the case when there are no $, @ or backslash in the expression
              * and not to define exparser for that case for maximum speed, since
@@ -224,7 +230,13 @@ bool VarSlot::evalStringRelation(string &val2, string &relation, string &type,
     } else if (relation=="substr") {
         return (val2.find(val1)!=string::npos);
     } else if (isREFunction(relation)) {
+#ifdef USE_RE2
         return this->evalRERelation(val2, val1, relation, type, new_bindings);
+#else 
+        FILE_LOG(logERROR) << "This binary of Iwaki has been built without regular expression support.";
+        FILE_LOG(logERROR) << "relation: " << relation << ", val1: " << val1 << ", val2:" << val2;
+        return false;
+#endif
     } else {
         FILE_LOG(logERROR) << "Unknown relation between strings.";
     }

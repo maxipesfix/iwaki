@@ -24,6 +24,8 @@
 #ifndef NLPW_UTILS_H
 #define NLPW_UTILS_H
 
+//#define USE_RE2
+
 #include <algorithm>
 #include <string>
 #include <iostream>
@@ -31,11 +33,17 @@
 #include <iomanip>
 #include <vector>
 #include "log.h"
+
+#ifdef USE_RE2
 #include <re2/re2.h>
 #include <re2/filtered_re2.h>
+#endif
 
 using namespace std;
+
+#ifdef USE_RE2
 using namespace re2;
+#endif
 
 /* convert stuff to string */
 template <class T>

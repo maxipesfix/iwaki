@@ -68,6 +68,7 @@ class TriggerableRecord {
     string max_instances;
 };
 
+#ifdef USE_RE2
 /* variable constraint binding */
 class VarSlot {
   public:
@@ -111,6 +112,46 @@ class VarSlot {
     RE2 *re_p;                     /* pointer to a pre-compiled regular expression */
 };
 
+#else
+
+/* variable constraint binding */
+class VarSlot {
+  public:
+    // default constructor
+    VarSlot(): relation("equal"), val("_NO_VALUE_"), type("string"),
+      unique_mask(false){}
+    VarSlot(string name, string val): name(name), relation("equal"), val(val),
+      type("string"), unique_mask(false){}
+    VarSlot(string name, const char *val): name(name), relation("equal"),
+      val((string)val), type("string"), unique_mask(false){}
+    VarSlot(string name, int val): name(name), relation("="),
+      val(to_string(val)), type("number"), unique_mask(false){}
+    VarSlot(string name, double val): name(name), relation("="),
+      val(to_string(val)), type("number"), unique_mask(false){}
+    VarSlot(string name, bool val): name(name), relation("equal"),
+      val(val ? "true" : "false"), type("string"), unique_mask(false){}
+    VarSlot(string name, string val, bool unique_mask): name(name),
+      relation("equal"), val(val), type("string"), unique_mask(unique_mask){}
+    bool load(TiXmlElement* pElem);
+    void print();
+    void print(TLogLevel log_level);
+    void printWithLabels();
+    bool unify(VarSlot &varslot2, Conjunction &new_bindings, HowComplete howcomplete);
+    bool evalRelation(string &val2, string &relation, string &type,
+                      Conjunction &new_bindings, HowComplete howcomplete);
+    bool evalStringRelation(string &val2, string &relation, string &type,
+                            Conjunction &new_bindings, HowComplete howcomplete);
+    bool evalNumberRelation(string &val2, string &relation, string &type,
+                            Conjunction &new_bindings, HowComplete howcomplete);
+  public:
+    string name;
+    string relation;
+    string val;
+    string var;
+    string type;
+    bool unique_mask;
+};
+#endif
 
 class Atom {
   public:

@@ -82,8 +82,8 @@ bool VarSlot::load(TiXmlElement* pElem)
 
                              /* if relations involves RE matching, precompile regular
                               * expression, if there are no $-vars inside */
-  if (isREFunction(this->relation) && (this->relation.find("$")==string::npos) &&
-      (this->relation.find("@")==string::npos)) {
+  if (isREFunction(this->relation) && (this->val.find("$")==string::npos) &&
+      (this->val.find("@")==string::npos)) {
           /* want to evaluate since there may be backslash escape chars. Do it always instead of checking
            * for backslash since this is done once during loading */
       Conjunction empty_bindings;
@@ -97,6 +97,7 @@ bool VarSlot::load(TiXmlElement* pElem)
                              << val1;
           FILE_LOG(logERROR) << this->re_p->error(); 
       }
+      FILE_LOG(logDEBUG4) << "Parsed RE: " << this->val;
           //this->re_p = &re;
   }
   

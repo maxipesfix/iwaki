@@ -217,7 +217,7 @@ bool VarSlot::evalStringRelation(string &val2, string &relation, string &type,
     }
 
         /* for strings we have equality and substr for now */
-    if ((relation=="=") || (relation=="equal")) {
+    if ((relation=="==") || (relation=="=") || (relation=="equal")) {
         return (val1==val2);
     } else if ((relation=="!=") || (relation=="not equal"))  {
         return (val1!=val2);
@@ -244,7 +244,7 @@ bool VarSlot::evalNumberRelation(string &val2, string &relation, string &type,
 
         /* quick _NO_VALUE_ check */
     if (this->val == "_NO_VALUE_") {
-        if ((relation=="=") || (relation=="equal") ||
+        if ((relation=="==") || (relation=="=") || (relation=="equal") ||
             (relation=="<=") || (relation=="leq") ||
              (relation==">=") || (relation=="geq")) {
             if (val2=="_NO_VALUE_") {return true;} else {return false;}
@@ -309,7 +309,7 @@ bool VarSlot::evalNumberRelation(string &val2, string &relation, string &type,
 
 
         /* do the number comparison */
-    if ((relation=="=") || (relation=="equal")) {
+    if ((relation=="==") || (relation=="=") || (relation=="equal")) {
         return (string_to_double(val1)==string_to_double(val2));
     } else if ((relation=="!=") || (relation=="not equal")) {
         return (string_to_double(val1)!=string_to_double(val2));

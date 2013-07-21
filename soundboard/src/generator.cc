@@ -37,6 +37,10 @@
 
 #include <fstream>
 
+#ifdef __MINGW32__ 
+#include <mmsystem.h>
+#endif
+
 using std::string;
 using std::iostream;
 
@@ -78,6 +82,10 @@ bool executeAction(Action &an_action) {
                 FILE_LOG(logERROR) << "Can't find sound file:" << full_filename;
                 return false;
             }
+#ifdef __MINGW32__ 
+			    /* Using winmm.a library call */
+			PlaySound("c:/Users/maxim/Downloads/test.wav", NULL, SND_ASYNC | SND_FILENAME);
+#else
                 /* using & to run gstreamer as a new processes to allow for
                  * asychnronous execution. -q quiets it although this
                  * doesn't prevent it with messing text_ui without &. */
@@ -85,10 +93,10 @@ bool executeAction(Action &an_action) {
                 full_filename + " &";
             const char *exec_cstr = (const char*)exec_str.c_str();
             int res = system(exec_cstr);
-                
             FILE_LOG(logINFO)  << "System() returned value: " << res
                                 << " when asked to execute command: " <<
                 exec_str;
+#endif
         }
     }
     return true;

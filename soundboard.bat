@@ -1,0 +1,1 @@
+start ./build/soundboard/bin/soundboard.exe -t 0.1 -d DEBUG4 -l log1 -p ./soundboard/scripts/ -i initialize_im.georgi.xml -s ./soundboard/sounds -x

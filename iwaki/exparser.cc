@@ -1039,24 +1039,40 @@ bool ExpressionParser::evalStringFunctionOrOperator( pair<string, TermType> &op_
                 getValue((arg_dq.end()-2)->first) :  (arg_dq.end()-2)->first;
             string arg2 = ((arg_dq.end()-1)->second == VARIABLE) ?
                 getValue((arg_dq.end()-1)->first) :  (arg_dq.end()-1)->first;
+#ifdef USE_RE2 
                         /* TODO: make sure arg2 has exactly one sub-pattern () */
             RE2::PartialMatch(arg1, arg2, &res);
             FILE_LOG(logDEBUG4) << "Evaluated PartialMatch with arg1: " << arg1 <<
                 ", arg2: " << arg2 << ", result: " << res ;
+#else
+            FILE_LOG(logERROR) << 
+              "This binary of Iwaki has been compiled without regular expression support:";
+            FILE_LOG(logERROR) << "@PartialMatch function is not available.";
+            FILE_LOG(logERROR) << "arg1: " << arg1 << ", arg2: " << arg2;
+            return false;
+#endif
         } else if (op_type_pair.first == "@FullMatch") {
             string arg1 = ((arg_dq.end()-2)->second == VARIABLE) ?
                 getValue((arg_dq.end()-2)->first) :  (arg_dq.end()-2)->first;
             string arg2 = ((arg_dq.end()-1)->second == VARIABLE) ?
                 getValue((arg_dq.end()-1)->first) :  (arg_dq.end()-1)->first;
+#ifdef USE_RE2
                         /* TODO: make sure arg2 has exactly one sub-pattern () */
             RE2::FullMatch(arg1, arg2, &res);
             FILE_LOG(logDEBUG4) << "Evaluated FullMatch with arg1: " << arg1 <<
                 ", arg2: " << arg2 << ", result: " << res ;
+#else
+            FILE_LOG(logERROR) << 
+              "This binary of Iwaki has been compiled without regular expression support:";
+            FILE_LOG(logERROR) << "@FullMatch function is not available.";
+            FILE_LOG(logERROR) << "arg1: " << arg1 << ", arg2: " << arg2;
+            return false;
+#endif
         } else {
             FILE_LOG(logERROR) << "Unimplemented string function: " <<
                 op_type_pair.first;
             return false;
-        }
+        } 
     }
     return true;
 }

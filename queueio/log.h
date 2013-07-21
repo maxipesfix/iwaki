@@ -191,16 +191,21 @@ inline string getTimeStampDelimPadded() {
     time_t t = time(0);   // get time now
     struct tm * now = localtime( & t );
     char buffer [80];
-     
+    /* windoes doesn't like colons */
+#ifndef __MINGW32__    
     strftime(buffer,80,"%Y-%b-%d-%H:%M:%S", now);
+#else
+    strftime(buffer,80,"%Y-%b-%d-%H-%M-%S", now);
+#endif    
+    
     return std::string(buffer);
 }
 
 inline bool setLogFile(std::string logfile_name) {
-    FILE* pFile = fopen((logfile_name + "." + getTimeStampDelimPadded() +
-                         ".txt").c_str(), "a");
+    FILE* pFile = fopen((logfile_name + "." + getTimeStampDelimPadded() +  ".txt").c_str(), "a");
+
     if (pFile==NULL) {
-        cout << "Failed to open log file "<< logfile_name << endl;
+        cout << "Failed to open log file "<< logfile_name + getTimeStampDelimPadded() + ".txt" << endl;
         return false;
     }
     Output2FILE::Stream() = pFile;

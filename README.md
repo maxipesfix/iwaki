@@ -21,10 +21,9 @@ soundboard
 
 A manual can be found in the PROJECTDIR/doc directory.
 
+## TO INSTALL AND RUN on Linux or Mac OS X
 
-
-## PREREQUISITES
-
+### PREREQUISITES on Linux or Mac OS X
 
 * RE2 regular expression library: http://code.google.com/p/re2/
 * Additionally, to run the Soundboard app, you will need to install 
@@ -33,8 +32,7 @@ A manual can be found in the PROJECTDIR/doc directory.
   * on Max OS X, nothing (Soundboard uses preinstalled `afplay`, which doesn't play ogg audio)
 
 
-## TO INSTALL on Linux or Mac OS X
-
+### TO INSTALL on Linux or Mac OS X
 
 Make sure that CMakeLists.txt in this directory includes the correct location
 of your RE2 library and header files.
@@ -65,6 +63,8 @@ moves header files and static libraries to /usr/local/include/ and usr/local/lib
 
 You are done!
 
+### TO RUN On Linux or Mac OS X
+
 To run soundboard app from PROJECTDIR/build directory, type:
 
 <pre>
@@ -76,6 +76,35 @@ where PROJECTDIR is the absolute path to the root of the iwaki installation tree
 For more details on soundboard app, refer to README inside iwaki/soundboard/ directory.
 
 
+## TO INSTALL AND RUN on Windows
+
+Current Windows port is built MinGW framework which does not support RE2 regular expression library. 
+Other features appear to work well.
+
+### PREREQUISITES on Windows
+
+* Cmake (tested with cmake-gui)
+* MinGW (tested with a 32-bit version)
+* ncurses (download and build for MinGW32)
+* Git Bash is helpful
+
+### TO INSTALL on Windows
+
+* Run cmake-gui with generators set to "MinGW Makefiles". 
+* Using MinGW Shell or Git Bash terminal, inside your build directory (usually, iwaki/build), issue 
+
+<pre>
+mingw32-make
+</pre>
+
+
+### TO RUN on Windows
+
+To run soundboard app from iwaki/build directory, use either Windows command line prompt (not Git Bash or MinGW Shell, 
+as they don't work well with ncurses), or from a Windows explorer, and execute iwaki/soundboard.bat script. 
+You should hear a heartbeat sound. 
+
+For more details on soundboard app, refer to README inside iwaki/soundboard/ directory.
 
 ## LICENSE
 

@@ -78,7 +78,7 @@ For more details on soundboard app, refer to README inside iwaki/soundboard/ dir
 
 ## TO INSTALL AND RUN on Windows
 
-Current Windows port is built MinGW framework which does not support RE2 regular expression library. 
+Current Windows port is built using MinGW framework which does not support RE2 regular expression library. 
 Other features appear to work well.
 
 ### PREREQUISITES on Windows

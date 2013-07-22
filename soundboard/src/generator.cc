@@ -73,8 +73,11 @@ bool executeAction(Action &an_action) {
         if (utterance_file != "_NO_VALUE_") {
                 /* action included utterance file, ignore the rest */
 
+#ifdef __MINGW32__ 
+			full_filename = sounds_path + "/" + utterance_file + ".wav";
+#else
             full_filename = sounds_path + "/" + utterance_file + ".ogg";
-
+#endif
             ifstream sound_file(full_filename.c_str());
             
             if ( !sound_file)
@@ -84,7 +87,7 @@ bool executeAction(Action &an_action) {
             }
 #ifdef __MINGW32__ 
 			    /* Using winmm.a library call */
-			PlaySound("c:/Users/maxim/Downloads/test.wav", NULL, SND_ASYNC | SND_FILENAME);
+			PlaySound(full_filename.c_str(), NULL, SND_ASYNC | SND_FILENAME);
 #else
                 /* using & to run gstreamer as a new processes to allow for
                  * asychnronous execution. -q quiets it although this

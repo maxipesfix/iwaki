@@ -203,7 +203,7 @@ inline int getCurrentYear() {
 inline int getCurrentMonth() {
     time_t t = time(0);   // get time now
     struct tm * now = localtime( & t );
-    return now->tm_mon;
+    return now->tm_mon + 1; /* adjust 0-11 to 1-12 */
 }
 
 inline int getCurrentMonthdayInt() {

@@ -650,6 +650,12 @@ bool ExpressionParser::evalFunctionOrOperator( pair<string, TermType> &op_type_p
             string arg1 = ((arg_dq.end()-1)->second == VARIABLE) ?
                 getValue((arg_dq.end()-1)->first) :  (arg_dq.end()-1)->first;
             res = to_string(-string_to_double(arg1));
+        } else if (op_type_pair.first == "^") {
+            string arg1 = ((arg_dq.end()-2)->second == VARIABLE) ?
+                getValue((arg_dq.end()-2)->first) :  (arg_dq.end()-2)->first;
+            string arg2 = ((arg_dq.end()-1)->second == VARIABLE) ?
+                getValue((arg_dq.end()-1)->first) :  (arg_dq.end()-1)->first;
+            res = to_string(pow(string_to_double(arg1), string_to_double(arg2)));
         } else {
             FILE_LOG(logERROR) << "Unimplemented operator: " <<
                 op_type_pair.first;

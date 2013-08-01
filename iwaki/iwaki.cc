@@ -451,40 +451,43 @@ bool InteractionManager::load_init(string init_filename)
 
         }
 
-            /* block: backchaineables */
-            TiXmlElement* pTrigNode =
-                hRoot.FirstChild( "backchaineables" ).FirstChild().Element();
-            for(; pTrigNode; pTrigNode=pTrigNode->NextSiblingElement())
-            {
-                string name = pTrigNode->Attribute("name");
-
-                    /* check if priority is specified */
-                int priority = 0;
-                if (pTrigNode->Attribute("priority")) {
-                    priority = string_to_number(pTrigNode->Attribute("priority"));
-
-                        /* if priority is specified,
-                         * update priority in the recipe map */
-
-                    map<string, Recipe>::iterator recipe_it =
-                        this->recipes.find(name);
-                    if (recipe_it == this->recipes.end()) {
-                        FILE_LOG(logERROR) <<
-                            "Error updating recipe priorities: recipe "
-                                           << name <<
-                            " is not found in IM recipe map";
-                        return false;
-                    } else {
-                        recipe_it->second.priority = priority;
-                    }
-                }
-
-                
-            }
-    
+            /* block: backchainables */
+        TiXmlElement* pTrigNode =
+            hRoot.FirstChild( "backchaineables" ).FirstChild().Element();
+        for(; pTrigNode; pTrigNode=pTrigNode->NextSiblingElement())
+        {
+            string name = pTrigNode->Attribute("name");
             
-    }
+                /* check if priority is specified */
+            int priority = 0;
+            if (pTrigNode->Attribute("priority")) {
+                priority = string_to_number(pTrigNode->Attribute("priority"));
+                
+                    /* if priority is specified,
+                     * update priority in the recipe map */
+                
+                map<string, Recipe>::iterator recipe_it =
+                    this->recipes.find(name);
+                if (recipe_it == this->recipes.end()) {
+                    FILE_LOG(logERROR) <<
+                        "Error updating recipe priorities: recipe "
+                                       << name <<
+                        " is not found in IM recipe map";
+                    return false;
+                } else {
+                    recipe_it->second.priority = priority;
+                }
+            }   
+        }
 
+            /* fill in the list of recipe names */
+        for (std::map<string, Recipe>::iterator recipe2_it =
+                 this->recipes.begin(); recipe2_it != this->recipes.end();
+             recipe2_it++) {
+            this->recipe_names.push_back(recipe2_it->first);
+        }
+    }
+    
     
     return loadOkay;
 }
@@ -952,17 +955,82 @@ void InteractionManager::printSettings() {
     FILE_LOG(logINFO)  << "   of which " << this->triggerables_rec.size() << " are triggerable.";
 }
 
+/*
+ * Parse the list of user-specified backchainables and verify that such recipes
+ * really exist.
+ * */
+
+std::list<string> parseBackchanablesFromUser(string recipe_names) {
+    std::list<string> recipeList = splitIntoListRemoveWhitespace(recipe_names, ',');
+        /* check that all the recipes in the list exist */
+    FILE_LOG(logDEBUG4)  << "User-defined backchainables are: ";
+    for (std::list<string>::const_iterator rname_it = recipeList.begin();
+             rname_it != recipeList.end(); rname_it++) {
+        FILE_LOG(logDEBUG4)  << *rname_it << ".";
+    }
+    return recipeList;
+}
+
+/* Given the goal, the list of candidates compute the backchanable candidates based
+ * on the match between the goal atom and postconditions.
+ * goalRecipeName is passed for logging only. */
+void InteractionManager::findBackchanablesForAGoal(BodyElement &element, std::list<string> &candidateRecipes, string goalRecipeName) {
+
+        /* things needed to be passed to unifyWithoutBinding */
+    std::vector< Match > mapping;
+    int matched_con_id;
+    Conjunction empty_binding;
+    
+    for (std::list<string>::iterator
+             recipeName_it = candidateRecipes.begin();
+         recipeName_it != candidateRecipes.end(); recipeName_it++) {
+
+        Recipe &candidateRecipe = this->recipes[*recipeName_it];
+        if (candidateRecipe.assignpost.disjuncts.size() == 0) {
+                /* empty postcondition, move on */
+            continue;
+        }
+                    
+        vector<Conjunction>::iterator conj_it =
+            candidateRecipe.assignpost.disjuncts.begin();
+                    
+        if (element.formula.unifyWithoutBinding((*conj_it),
+                                                    empty_binding,
+                                                    mapping,
+                                                    matched_con_id,
+                                                    Complete)) {
+                /* insert the recipe into backchainables list
+                 * in the order of decreasing priority.
+                 * NOTE: insert at the end of the priority group
+                 * because, guess what, some recipes already
+                 * rely on the order in the init file. Need those
+                 * recipes rewritten! */
+            std::list<string>::iterator bchain_it = element.backchainables.begin();
+            while ((bchain_it !=  element.backchainables.end()) &&
+                   (this->recipes.find(*bchain_it)->second.priority >=
+                    candidateRecipe.priority)) {
+                bchain_it++;
+            }
+            element.backchainables.insert(bchain_it,
+                                                candidateRecipe.name);
+                /* inserted just before the recipe of a lower priority
+                 * (or in the end) */
+            FILE_LOG(logDEBUG2) << "Postconditions of recipe "
+                                << candidateRecipe.name << 
+                " may potentially satisfy goal " <<
+                element.name <<
+                " of recipe " << goalRecipeName;
+        }
+    }
+
+}
 
 /* Find potential backchainable recipes for each goal, based on the match
  * between goal and postcondition. Only the list of recipes and their content
  * should be necessary for this operation (nothing else from the IM object) */
 void InteractionManager::preprocessBackchainables() {
 
-        /* things needed to be passed to unifyWithoutBinding*/
-    std::vector< Match > mapping;
-    int matched_con_id;
-    Conjunction empty_binding;
-    
+        /* iterate through recipes looking for goals */
     for (std::map<string, Recipe>::iterator recipe_it = this->recipes.begin();
          recipe_it != this->recipes.end(); recipe_it++) {
    
@@ -971,51 +1039,40 @@ void InteractionManager::preprocessBackchainables() {
                  element_it = recipe_it->second.body.elements.begin();
              element_it != recipe_it->second.body.elements.end(); element_it++) {
 
+            
             if (element_it->element_type == "goal") {
-                    /* iterate through the recipes trying to find potentiall
-                     * matching postconditions */
-                for (std::map<string, Recipe>::iterator
-                         recipe_it2 = this->recipes.begin();
-                     recipe_it2 != this->recipes.end(); recipe_it2++) {
-
-                    if (recipe_it2->second.assignpost.disjuncts.size() == 0) {
-                            /* empty postcondition, move on */
-                        continue;
+                if ((element_it->recipe_name == "any") ||
+                    (element_it->recipe_name.empty())) {
+                    
+                    if (element_it->formula.disjuncts.size() == 0) {
+                        FILE_LOG(logERROR) << "Recipe " << recipe_it->first
+                                           << " has a goal with recipe_names set as 'any' "
+                                           << "and the empty goal formula."
+                                           << "This does not make much sense.";
                     }
+                        /* if there are no restrictions on backchanable recipes
+                         * iterate through all the recipes trying to find potentially
+                         * matching postconditions */
+                    findBackchanablesForAGoal(*element_it, this->recipe_names,
+                                              recipe_it->first); 
                     
-                    vector<Conjunction>::iterator conj_it =
-                        recipe_it2->second.assignpost.disjuncts.begin();
+                } else {
+                        /* pass the list of the candidate recipes from the
+                         * goal's recipe_name attribute */
+     
+                    std::list<string> backchainablesFromUser =
+                        parseBackchanablesFromUser(element_it->recipe_name);
                     
-                    if (element_it->formula.unifyWithoutBinding((*conj_it),
-                                                         empty_binding,
-                                                         mapping,
-                                                         matched_con_id,
-                                                         Complete)) {
-                            /* insert the recipe into backchainables list
-                             * in the order of decreasing priority.
-                             * NOTE: insert at the end of the priority group
-                             * because, guess what, some recipes already
-                             * rely on the order in the init file. Need those
-                             * recipes rewritten! */
-                        std::list<string>::iterator bchain_it = element_it ->
-                            backchainables.begin();
-                        while ((bchain_it !=  element_it -> backchainables.end()) &&
-                               (this->recipes.find(*bchain_it)->second.priority >=
-                                this->recipes.find(recipe_it2->second.name) ->
-                                second.priority)) {
-                            bchain_it++;
-                        }
-                        element_it -> backchainables.insert(bchain_it,
-                                                            recipe_it2->second.name);
-                            /* inserted just before the recipe of a lower priority
-                             * (or in the end) */
-                        FILE_LOG(logDEBUG2) << "Postconditions of recipe "
-                                            << recipe_it2->second.name << 
-                            " may potentially satisfy goal " <<
-                            element_it->name <<
-                            " of recipe " << recipe_it->second.name;
+                    if (element_it->formula.disjuncts.size() == 0) {
+                            /* if goal is empty, just copy user-defined backchainables to
+                             * computed backchainables */
+                        element_it->backchainables = backchainablesFromUser;  
+                    } else {
+                        findBackchanablesForAGoal(*element_it, backchainablesFromUser,
+                                                  recipe_it->first);
                     }
                 }
+
                     /* print the backchinables for this goal to the log file */
                 FILE_LOG(logINFO) << "Backchainables for the recipe " <<
                     recipe_it->second.name << " are: ";
@@ -2200,16 +2257,19 @@ bool InteractionManager::tryBackchainOnGoal(BodyElement &element1, tree<Node>::i
         /* work on a copy of the goal formula*/
     Formula goalFormula = element1.formula;
         /* check if the goal is already true by binding "this" and
-         * matching against globals (same as checking whilecondition) */
+         * matching against globals (same as checking whilecondition).
+         * If goal formula is empty, it is not satisfied, and
+         * is satisfied by any of the user-defined backchainable recipes */
     goalFormula.bindThis(node->bindings, node->recipe_name);
-    if (goalFormula.unifyWithoutBinding(*(this->getGlobalBindings()),
-                                        node->bindings)) {
+    if ( (goalFormula.disjuncts.size() != 0)
+         && goalFormula.unifyWithoutBinding(*(this->getGlobalBindings()),
+                                            node->bindings) ) {
         FILE_LOG(logDEBUG3) << "Goal " << element1.name <<
             " is already satisfied by globals.";
         status = "completed";
         return true;
     }
-        /* OK goal is not already true. Try to match against
+        /* OK goal is not already true or goal is empty. Try to match against
          * assignposts of recipes. There are no missing type and subtype
          * slots, since recipe loading took care of that. */
     
@@ -2282,7 +2342,8 @@ bool InteractionManager::tryBackchainOnGoalWithRecipe(Recipe &recipe,
     if (conj_it == recipe.assignpost.disjuncts.end()) {
             /* empty assignpost satisfies only empty goals. For now
              * we disallow empty goals though, so, false. */
-        return false;}
+        return false;
+    }
 
         /* TODO: tricky case of unification. nail it.*/
     

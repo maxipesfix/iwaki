@@ -353,7 +353,8 @@ class BodyElement {
     double timeout;
     double dispatch_time;
     string priority;
-    std::list<string> backchainables; /* list of recipes that can potentially
+    std::list<string> backchainables; /* computed list of recipes that
+                                       * can potentially
                                        * satisfy this goal element */
 };
 
@@ -573,6 +574,7 @@ class InteractionManager{
         /* IM: methods for plan tree transformations */
     bool tryPushTriggerables();
     bool tryPushTriggerable(TriggerableRecord &a_trig);
+    void findBackchanablesForAGoal(BodyElement &element, std::list<string> &candidateRecipes, string goalRecipeName);
     void preprocessBackchainables();
     bool preprocess();
     bool initialize();
@@ -642,6 +644,7 @@ class InteractionManager{
     std::list<TriggerableRecord> triggerables_rec;
     std::map<string, Recipe> recipes;
     std::map<string, Action> actions;
+    std::list<string> recipe_names;
     /** current state of the IM **/
     PlanTree ptree;  		/** plan tree **/
     FocusStack fstack; 		/** focus stack **/

@@ -38,7 +38,7 @@
       </atom>
     </assignment>
 
-    <goal recipe_name="any" initiator="any">
+    <goal recipe_name="q2u_how_are_you_answer_yes , q2u_how_are_you_answer_no" initiator="any">
       <atom>
         <slot name="q2u_how_are_you_handled" val="true"/>
         <slot name="this" var="present_user_atom"/>

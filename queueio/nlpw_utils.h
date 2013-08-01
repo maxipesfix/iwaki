@@ -47,6 +47,15 @@ using namespace std;
 using namespace re2;
 #endif
 
+struct RemoveWhitespace
+{
+  bool operator()(char c)
+  {
+    return (c =='\r' || c =='\t' || c == ' ' || c == '\n');
+  }
+};
+
+
 /* convert stuff to string */
 template <class T>
 inline std::string to_string (const T& t)
@@ -97,7 +106,8 @@ inline std::string toLowerCaseReturns(std::string &str)
     return result;
 }
 
-inline std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
+inline std::vector<std::string> &split(const std::string &s, char delim,
+                                       std::vector<std::string> &elems) {
     std::stringstream ss(s);
     std::string item;
     while(std::getline(ss, item, delim)) {
@@ -105,6 +115,23 @@ inline std::vector<std::string> &split(const std::string &s, char delim, std::ve
     }
     return elems;
 }
+
+
+
+inline std::list<std::string> splitIntoListRemoveWhitespace(const std::string &s, char delim) {
+    std::list<std::string> elems;
+    std::stringstream ss(s);
+    std::string item;
+    while(std::getline(ss, item, delim)) {
+        item.erase( std::remove_if(
+                        item.begin(), item.end(),
+                        RemoveWhitespace()),
+                    item.end() );
+        elems.push_back(item);
+    }
+    return elems;
+}
+
 
 
 /* remove weekdate which is the first th space-separated chunk

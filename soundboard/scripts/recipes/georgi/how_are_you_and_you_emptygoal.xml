@@ -31,18 +31,7 @@
       </roboml:args>
     </action>
 
-    <assignment>
-      <atom>
-        <slot name="this" var="present_user_atom"/>
-        <slot name="q2u_how_are_you_handled" val="false"/>
-      </atom>
-    </assignment>
-
-    <goal recipe_name="any" initiator="any">
-      <atom>
-        <slot name="q2u_how_are_you_handled" val="true"/>
-        <slot name="this" var="present_user_atom"/>
-      </atom>
+    <goal recipe_name="q2u_how_are_you_answer_yes , q2u_how_are_you_answer_no" initiator="any">
     </goal>
 
 </body>
@@ -101,11 +90,6 @@
 
 <!-- set right after execution ends -->
   <assignpost>
-    <atom>
-    <!-- set object which name is equal to the one stored in var -->
-      <slot name="this" var="present_user_atom"/>
-      <slot name="q2u_how_are_you_handled" val="true"/>
-    </atom>
   </assignpost>
   
 </recipe>
@@ -153,12 +137,6 @@
 
 <!-- set right after execution ends -->
   <assignpost>
-    <atom>
-    <!-- set object which name is equal to the one stored in var -->
-      <slot name="this" var="present_user_atom"/>
-      <slot name="q2u_how_are_you_handled" val="true"/>
-      <slot name="uu_unhandled" val="false"/>
-    </atom>
   </assignpost>
   
 </recipe>

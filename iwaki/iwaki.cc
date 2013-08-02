@@ -2339,9 +2339,8 @@ bool InteractionManager::tryBackchainOnGoalWithRecipe(Recipe &recipe,
 
         /* assignpost is only one conjunction */
     vector<Conjunction>::iterator conj_it = recipe.assignpost.disjuncts.begin();
-    if (conj_it == recipe.assignpost.disjuncts.end()) {
-            /* empty assignpost satisfies only empty goals. For now
-             * we disallow empty goals though, so, false. */
+    if (recipe.assignpost.disjuncts.empty() && !goalFormula2.disjuncts.empty()) {
+            /* empty assignpost satisfies only empty goals. */
         return false;
     }
 
@@ -2406,55 +2405,63 @@ bool InteractionManager::tryBackchainOnGoalWithRecipe(Recipe &recipe,
          * set them for precond. */
         /* get the right conjunction from goalFormula1. Use goalFormula1,
          * since it has instantiated "this" slots */
+
+    if (!goalFormula2.disjuncts.empty()) {
     
-    Conjunction &matched_con = goalFormula1.disjuncts[matched_con_id];
+    
+        Conjunction &matched_con = goalFormula1.disjuncts[matched_con_id];
         
-    for (std::vector< Atom >::iterator atom_it = conj_it->atoms.begin();
-         atom_it != conj_it->atoms.end(); atom_it++) {
-        new_var = atom_it->readSlotVar("this");
-        if ((new_var == "_NO_VALUE_")||(new_var == "_NOT_FOUND_")) {
-            FILE_LOG(logERROR) <<
-                "Not found a var for 'this' atom of assignpost with i = "
-                               << i;
-            return false;
-        }
-            /* find corresponding atom in goal, get its "this" val */
-        bool found = false;
-        for(std::vector< Match >::iterator aMatch_it=mapping.begin(); 
-            aMatch_it != mapping.end(); aMatch_it++) {
-            if (aMatch_it->id2 == i) {
-                id1 = aMatch_it->id1;
-                found = true;
-                break;
+        for (std::vector< Atom >::iterator atom_it = conj_it->atoms.begin();
+             atom_it != conj_it->atoms.end(); atom_it++) {
+            new_var = atom_it->readSlotVar("this");
+            if ((new_var == "_NO_VALUE_")||(new_var == "_NOT_FOUND_")) {
+                FILE_LOG(logERROR) <<
+                    "Not found a var for 'this' atom of assignpost with i = "
+                                   << i;
+                return false;
             }
-        }
-        if (!found) {
-            FILE_LOG(logERROR) << "Not found a match entry in mapping for\n"
-                               << "assignpost atom with 'this' = " << new_var;
-            return false;
-        }
-            /* got id1, read "this" var of id1-th atom from match_con_id of
-             * the goal. */
-        this_val = matched_con.atoms[id1].readSlotVal("this");
-        if ((this_val == "_NO_VALUE_")||(this_val == "_NOT_FOUND_")) {
-            FILE_LOG(logERROR) <<
-                "Not found a val for 'this' atom of a goal";
-            return false;
-        }
-            /* find an atom in precond of the new recipe with var==new_val */
-        Atom* precAtom_p = precond.findAtomByVar(new_var);
-        if (!precAtom_p) {
-            FILE_LOG(logERROR) << "No assignpost var: " << new_var <<
-                " found in preconditions of new recipe: " <<
-                recipe.name;
-            return false;
-        }
-            /* update that atom's "this" val to this_val */
-        precAtom_p->setSlotVal("this", this_val);
+                /* find corresponding atom in goal, get its "this" val */
+            bool found = false;
+            for(std::vector< Match >::iterator aMatch_it=mapping.begin(); 
+                aMatch_it != mapping.end(); aMatch_it++) {
+                if (aMatch_it->id2 == i) {
+                    id1 = aMatch_it->id1;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                FILE_LOG(logERROR) << "Not found a match entry in mapping for\n"
+                                   << "assignpost atom with 'this' = " << new_var;
+                return false;
+            }
+                /* got id1, read "this" var of id1-th atom from match_con_id of
+                 * the goal. */
+            this_val = matched_con.atoms[id1].readSlotVal("this");
+            if ((this_val == "_NO_VALUE_")||(this_val == "_NOT_FOUND_")) {
+                FILE_LOG(logERROR) <<
+                    "Not found a val for 'this' atom of a goal";
+                return false;
+            }
+                /* find an atom in precond of the new recipe with var==new_val */
+            Atom* precAtom_p = precond.findAtomByVar(new_var);
+            if (!precAtom_p) {
+                FILE_LOG(logERROR) << "No assignpost var: " << new_var <<
+                    " found in preconditions of new recipe: " <<
+                    recipe.name;
+                return false;
+            }
+                /* update that atom's "this" val to this_val */
+            precAtom_p->setSlotVal("this", this_val);
         
-            /* increment assignpost atom index */
-        i++;
+                /* increment assignpost atom index */
+            i++;
+        }
     }
+
+        /*
+         * Check preconditions
+         * */
     
     if (this->checkPreconditionGivenFormula(precond, root, new_bindings)) {
             /** make a new tree node, assign the new bindings to it**/

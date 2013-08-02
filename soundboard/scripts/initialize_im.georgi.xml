@@ -10,7 +10,7 @@
 
  
   <recipefiles>
-    <file>georgi/how_are_you_and_you.xml</file>
+    <file>georgi/how_are_you_and_you_emptygoal.xml</file>
     <file>georgi/how_are_you.xml</file>
     <file>georgi/heartbeat.xml</file>
   </recipefiles>

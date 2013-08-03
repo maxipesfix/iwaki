@@ -13,3 +13,9 @@ Iwaki is distributed under GPLv3.
 # Soundboard
 
   - Maxim Makatchev &lt;maxi at cmu.edu&gt;
+
+
+Contributors
+============
+
+- James Samotshozo

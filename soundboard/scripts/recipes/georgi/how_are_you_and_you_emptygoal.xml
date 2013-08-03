@@ -31,8 +31,7 @@
       </roboml:args>
     </action>
 
-    <goal recipe_name="q2u_how_are_you_answer_yes , q2u_how_are_you_answer_no" initiator="any">
-    </goal>
+    <goal recipe_name="q2u_how_are_you_answer_yes , q2u_how_are_you_answer_no" initiator="any"/>
 
 </body>
 

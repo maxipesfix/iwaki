@@ -231,6 +231,8 @@ bool VarSlot::evalStringRelation(string &val2, string &relation, string &type,
         return (val1!=val2);
     } else if (relation=="substr") {
         return (val2.find(val1)!=string::npos);
+    } else if ((relation=="!substr") || (relation=="inverse substr")) {
+        return !(val2.find(val1)!=string::npos);
     } else if (isREFunction(relation)) {
 #ifdef USE_RE2
         return this->evalRERelation(val2, val1, relation, type, new_bindings);

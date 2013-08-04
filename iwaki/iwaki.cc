@@ -971,6 +971,28 @@ std::list<string> parseBackchanablesFromUser(string recipe_names) {
     return recipeList;
 }
 
+
+
+    /* insert the recipe into backchainables list
+     * in the order of decreasing priority.
+     * NOTE: insert at the end of the priority group
+     * because, guess what, some recipes already
+     * rely on the order in the init file. Need those
+     * recipes rewritten! */
+void InteractionManager::insertRecipeIntoPrioritySortedList(
+    std::list<string> &recipe_list, Recipe &aRecipe) {
+    
+    std::list<string>::iterator bchain_it = recipe_list.begin();
+    while ((bchain_it !=  recipe_list.end()) &&
+           (this->recipes.find(*bchain_it)->second.priority >=
+            aRecipe.priority)) {
+        bchain_it++;
+    }
+        /* inserted just before the recipe of a lower priority
+         * (or in the end) */
+    recipe_list.insert(bchain_it, aRecipe.name);
+}
+
 /* Given the goal, the list of candidates compute the backchanable candidates based
  * on the match between the goal atom and postconditions.
  * goalRecipeName is passed for logging only. */
@@ -986,9 +1008,18 @@ void InteractionManager::findBackchanablesForAGoal(BodyElement &element, std::li
          recipeName_it != candidateRecipes.end(); recipeName_it++) {
 
         Recipe &candidateRecipe = this->recipes[*recipeName_it];
+        
         if (candidateRecipe.assignpost.disjuncts.size() == 0) {
-                /* empty postcondition, move on */
-            continue;
+            if (element.formula.disjuncts.size() == 0) {
+                    /* empty postcondition, empty goal, just insert the
+                     * candidate in the order of priority */
+                insertRecipeIntoPrioritySortedList(element.backchainables,
+                                                   candidateRecipe);
+            } else {
+                    /* empty postcondition can't trigger a backchainable
+                     * recipe to satisfy a non-empty goal, move on */
+                continue;
+            }
         }
                     
         vector<Conjunction>::iterator conj_it =
@@ -999,22 +1030,8 @@ void InteractionManager::findBackchanablesForAGoal(BodyElement &element, std::li
                                                     mapping,
                                                     matched_con_id,
                                                     Complete)) {
-                /* insert the recipe into backchainables list
-                 * in the order of decreasing priority.
-                 * NOTE: insert at the end of the priority group
-                 * because, guess what, some recipes already
-                 * rely on the order in the init file. Need those
-                 * recipes rewritten! */
-            std::list<string>::iterator bchain_it = element.backchainables.begin();
-            while ((bchain_it !=  element.backchainables.end()) &&
-                   (this->recipes.find(*bchain_it)->second.priority >=
-                    candidateRecipe.priority)) {
-                bchain_it++;
-            }
-            element.backchainables.insert(bchain_it,
-                                                candidateRecipe.name);
-                /* inserted just before the recipe of a lower priority
-                 * (or in the end) */
+            insertRecipeIntoPrioritySortedList(element.backchainables, candidateRecipe);
+
             FILE_LOG(logDEBUG2) << "Postconditions of recipe "
                                 << candidateRecipe.name << 
                 " may potentially satisfy goal " <<

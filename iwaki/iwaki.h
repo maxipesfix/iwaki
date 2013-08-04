@@ -574,6 +574,8 @@ class InteractionManager{
         /* IM: methods for plan tree transformations */
     bool tryPushTriggerables();
     bool tryPushTriggerable(TriggerableRecord &a_trig);
+    void insertRecipeIntoPrioritySortedList(std::list<string> &recipe_list,
+                                            Recipe &aRecipe);
     void findBackchanablesForAGoal(BodyElement &element, std::list<string> &candidateRecipes, string goalRecipeName);
     void preprocessBackchainables();
     bool preprocess();

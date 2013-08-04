@@ -1079,15 +1079,8 @@ void InteractionManager::preprocessBackchainables() {
      
                     std::list<string> backchainablesFromUser =
                         parseBackchanablesFromUser(element_it->recipe_name);
-                    
-                    if (element_it->formula.disjuncts.size() == 0) {
-                            /* if goal is empty, just copy user-defined backchainables to
-                             * computed backchainables */
-                        element_it->backchainables = backchainablesFromUser;  
-                    } else {
-                        findBackchanablesForAGoal(*element_it, backchainablesFromUser,
-                                                  recipe_it->first);
-                    }
+                    findBackchanablesForAGoal(*element_it, backchainablesFromUser,
+                                              recipe_it->first);
                 }
 
                     /* print the backchinables for this goal to the log file */

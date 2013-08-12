@@ -1,0 +1,46 @@
+\chapter{Recipes}
+\label{Chapter4}
+
+In Section~\ref{sec:Ch3Recipes}, we outlined the structure of a recipe. In this chapter we will describe each of the recipe components in detail. You will know how to write a recipe to respond to a particular input, and how to implement control flow, including conditionals via backchaining.
+
+
+
+\section{Preconditions}
+\section{Body}
+
+A body of the recipe consists of a sequence of \textsl{body elements}. A body element is an \textsl{assignment}, an \textsl{action}, or a \textsl{goal}. At present (version 0.1), body elements are executed sequentially. Action and goal body elements are different from the assignment in that they may take undetermined amount of time. To allow for the execution to continue even if an action or a goal takes too long time to complete, action tag has an optional timeout attribute. Actions are different from both assignments and goals in that their execution may return a status different from the successful \textsl{completed} status. Returned action status can be used to specify the control flow for the rest of the recipe, such as moving to the next body element, moving to the assignpost, or moving to the end (purging the recipe).
+
+\subsection{Assignment}
+\subsection{Action}
+\subsection{Goal}
+
+A goal specifies the set of recipes that can be used to backchain on it. There are two way to define a goal. First, via a formula that must be satisfied by the child recipe. Second, by explicitely listing the names of potential child recipes. In the latter case, the formula is optional. We refer to a goal without a formula as an \textsl{empty goal}.
+
+\subsubsection{A goal with a formula}
+
+An example of a goal with a formula is show below:
+
+\lstset{language=XML}
+\begin{lstlisting}
+    <goal recipe_name="any" initiator="any">
+      <atom>
+        <slot name="q2u_how_are_you_handled" val="true"/>
+        <slot name="this" var="present_user_atom"/>
+      </atom>
+    </goal>
+\end{lstlisting}
+
+
+During the preprocessing stage, for each of the goals, Iwaki idetifies recipes whose postconditions, once executed, will satisfy the goal's formula.  These recipes are selected from those listed in the \textsl{recipe\_name} attribute. If the \textsl{recipe\_name}  attribute is empty, or is equal to 'any', then all recipes loaded via init file are potential candidates.
+ 
+\subsection{An empty goal}
+
+\lstset{language=XML}
+\begin{lstlisting}
+    <goal recipe_name="q2u_how_are_you_answer_yes, q2u_how_are_you_answer_no" initiator="any"/>
+\end{lstlisting}
+
+An empty goal does not include a formula. Potential child recipes are specified by \textsl{recipe\_name} attribute. If \textsl{recipe\_name} is left empty or set to ``any'' a warning will be issued at the preprocessing stage, since that means that any recipe can be a potential child.
+
+\section{Postconditions}
+

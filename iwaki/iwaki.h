@@ -307,7 +307,8 @@ class Matching {
 class BodyElement {
   public:
         // default constructor
-    BodyElement(): chosen_outcome(-1), unique_within(0), random(false),
+    BodyElement(): forced(false),
+        chosen_outcome(-1), unique_within(0), random(false),
         pXmlElement(NULL),
         timeout(DEFAULT_ACTION_TIMEOUT),
         dispatch_time(0.0)
@@ -332,7 +333,8 @@ class BodyElement {
   public:
     string element_type; /* assignment, action, goal*/
     string name; /* name if action */
-    string recipe_name; /* recipe name or 'any' */
+    string recipe_name; /* recipe names or 'any' */
+    bool forced; /* forced backchaining even if the goal is true */
     Formula formula; /* goal or assignment*/
     string actor; /* who does the action */
     string action_space; /* which namespace to search action name in */
@@ -576,7 +578,7 @@ class InteractionManager{
     bool tryPushTriggerable(TriggerableRecord &a_trig);
     void insertRecipeIntoPrioritySortedList(std::list<string> &recipe_list,
                                             Recipe &aRecipe);
-    void findBackchanablesForAGoal(BodyElement &element, std::list<string> &candidateRecipes, string goalRecipeName);
+    void findBackchainablesForAGoal(BodyElement &element, std::list<string> &candidateRecipes, string goalRecipeName);
     void preprocessBackchainables();
     bool preprocess();
     bool initialize();

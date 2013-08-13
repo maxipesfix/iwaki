@@ -453,13 +453,24 @@ bool BodyElement::load(TiXmlElement* pElem)
       this->initiator = pElem->Attribute("initiator");
     } 
     else {
-      FILE_LOG(logERROR) << "Error: goal has no initiator.";
-      return false;
+      FILE_LOG(logWARNING) <<
+          "Goal has no initiator. It's OK, since initiator is not implemented yet.";
     }
     /* recipe_name */
     if (pElem->Attribute("recipe_name")) {
       this->recipe_name = pElem->Attribute("recipe_name");
     }
+    /* force backchaining even if goal is true */
+    if (pElem->Attribute("forced")) {
+        string forced = pElem->Attribute("forced"); /* because need to cast this as string
+                                                     * before comparing with strings */
+        if (forced == "true") {
+            this->forced = true;
+        } else { 
+            this->forced = false;
+        }
+    }
+    
     if (!this->formula.load(pElem)){
       FILE_LOG(logERROR) << "Error: could not load the formula in goal: " << this->name;
       return false;
@@ -474,7 +485,8 @@ bool BodyElement::load(TiXmlElement* pElem)
       this->name = pElem->Attribute("name");
     }
     if (!this->formula.load(pElem)){
-      FILE_LOG(logERROR) << "Error: could not load the formula in assignment: " << this->name;
+      FILE_LOG(logERROR) << "Error: could not load the formula in assignment: " <<
+          this->name;
       return false;
     }
     //cout << "Assignment name:"<< this->name << endl;

@@ -996,7 +996,7 @@ void InteractionManager::insertRecipeIntoPrioritySortedList(
 /* Given the goal, the list of candidates compute the backchanable candidates based
  * on the match between the goal atom and postconditions.
  * goalRecipeName is passed for logging only. */
-void InteractionManager::findBackchanablesForAGoal(BodyElement &element, std::list<string> &candidateRecipes, string goalRecipeName) {
+void InteractionManager::findBackchainablesForAGoal(BodyElement &element, std::list<string> &candidateRecipes, string goalRecipeName) {
 
         /* things needed to be passed to unifyWithoutBinding */
     std::vector< Match > mapping;
@@ -1070,7 +1070,7 @@ void InteractionManager::preprocessBackchainables() {
                         /* if there are no restrictions on backchanable recipes
                          * iterate through all the recipes trying to find potentially
                          * matching postconditions */
-                    findBackchanablesForAGoal(*element_it, this->recipe_names,
+                    findBackchainablesForAGoal(*element_it, this->recipe_names,
                                               recipe_it->first); 
                     
                 } else {
@@ -1079,7 +1079,7 @@ void InteractionManager::preprocessBackchainables() {
      
                     std::list<string> backchainablesFromUser =
                         parseBackchanablesFromUser(element_it->recipe_name);
-                    findBackchanablesForAGoal(*element_it, backchainablesFromUser,
+                    findBackchainablesForAGoal(*element_it, backchainablesFromUser,
                                               recipe_it->first);
                 }
 
@@ -2266,14 +2266,16 @@ bool InteractionManager::tryBackchainOnGoal(BodyElement &element1, tree<Node>::i
     bool res = false;
         /* work on a copy of the goal formula*/
     Formula goalFormula = element1.formula;
-        /* check if the goal is already true by binding "this" and
+        /* if the goal is not foced not be backchained upon,
+         * check if the goal is already true by binding "this" and
          * matching against globals (same as checking whilecondition).
-         * If goal formula is empty, it is not satisfied, and
+         * If goal formula is empty, it is considered as not satisfied, and
          * is satisfied by any of the user-defined backchainable recipes */
     goalFormula.bindThis(node->bindings, node->recipe_name);
     if ( (goalFormula.disjuncts.size() != 0)
          && goalFormula.unifyWithoutBinding(*(this->getGlobalBindings()),
-                                            node->bindings) ) {
+                                            node->bindings)
+         && (!element1.forced) ) {
         FILE_LOG(logDEBUG3) << "Goal " << element1.name <<
             " is already satisfied by globals.";
         status = "completed";

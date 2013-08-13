@@ -14,7 +14,7 @@ A body of the recipe consists of a sequence of \textsl{body elements}. A body el
 \subsection{Actions}
 \subsection{Goals}
 
-A goal specifies the set of recipes that can be used to backchain on it. There are two way to define a goal. First, via a formula that must be satisfied by the child recipe. Second, by explicitely listing the names of potential child recipes. In the latter case, the formula is optional. We refer to a goal without a formula as an \textsl{empty goal}.
+A goal specifies the set of recipes that can be used to backchain on it. There are two way to define a goal. First, via a formula that must be satisfied by the child recipe. Second, by explicitly listing the names of potential child recipes. In the latter case, the formula is optional. We refer to a goal without a formula as an \textsl{empty goal}.
 
 \subsubsection{A goal with a formula}
 
@@ -31,7 +31,7 @@ An example of a goal with a formula is show below:
 \end{lstlisting}
 
 
-During the preprocessing stage, for each of the goals, Iwaki idetifies recipes whose postconditions, once executed, will satisfy the goal's formula.  These recipes are selected from those listed in the \textsl{recipe\_name} attribute. If the \textsl{recipe\_name}  attribute is empty, or is equal to 'any', then all recipes loaded via init file are potential candidates. 
+During the preprocessing stage, for each of the goals, Iwaki identifies recipes whose postconditions, once executed, will satisfy the goal's formula.  These recipes are selected from those listed in the \textsl{recipe\_name} attribute. If the \textsl{recipe\_name}  attribute is empty, or is equal to 'any', then all recipes loaded via init file are potential candidates. 
  
 \subsubsection{An empty goal}
 
@@ -44,9 +44,9 @@ An empty goal does not include a formula. Potential child recipes are specified 
 
 \subsubsection{Control flow with the goals}
 
-When execution reaches the goal elemenet of a recipe's body, the further control flow depends on whether the goal contains a formula or not, and whether the \textsl{forced} attribute of goal tag is set to ``true'' or not. 
+When execution reaches the goal element of a recipe's body, the further control flow depends on whether the goal contains a formula or not, and whether the \textsl{forced} attribute of goal tag is set to ``true'' or not. 
 \begin{itemize}
-\item If the goal's formula is not empty \textit{and} the goal's \textsl{forced} attribute is not set to ``true'', the formula will be checked for satisfiability against current global state of the system. If the formula is already satisfied, the execution flow moves to the next body element (or the postcondition if the goal was the last element of the body). If the formula is not satisfied, backchainable recipes will be attempted, in order of their priority, to be backchained upon by matching them against the goal and checking if their preconditins are satisfied.
+\item If the goal's formula is not empty \textit{and} the goal's \textsl{forced} attribute is not set to ``true'', the formula will be checked for satisfiability against current global state of the system. If the formula is already satisfied, the execution flow moves to the next body element (or the postcondition if the goal was the last element of the body). If the formula is not satisfied, backchainable recipes will be attempted, in order of their priority, to be backchained upon by matching them against the goal and checking if their preconditions are satisfied.
 \item If the goal's formula is not empty \textit{and} the goal's \textsl{forced} attribute is set to ``true,'' then the goal's formula is \textit{not} checked on satisfiability by current state, and the attempt to backchain is forced independently on whether the goal's formula is already satisfied.
 \item If the goal's formula is empty, then the attempt to backchain is made on the backchainable recipes specified in the goal's \textsl{recipe\_name} attribute. This can be thought as a forced backchaining on a formula that is already satisfied, since an empty formula is true by the definition.
 \end{itemize}
@@ -73,7 +73,7 @@ The postconditions of \textsl{q2u\_how\_are\_you\_answer\_yes}, \textsl{q2u\_how
   </assignpost>
 \end{lstlisting}
 
-Since the atom in the goal's formula in this example will match any atom of postcondition (because \textsl{this} slot of postconiditon is always uninstantiated before the actual backchained recipe is loaded), more slots may be necessary if there is an ambiguity between the goal's and postcondition's atoms.
+Since the atom in the goal's formula in this example will match any atom of postcondition (because \textsl{this} slot of postcondition is always uninstantiated before the actual backchained recipe is loaded), more slots may be necessary if there is an ambiguity between the goal's and postcondition's atoms.
 
 \section{Postconditions}
 

@@ -45,19 +45,21 @@ The command line options specify the following:
 \begin{itemize}
 \item[] \texttt{-h} \hspace{2cm} Prints command line options information
 
-\item[] \texttt{-d level} \hspace{2cm} One of the following debug levels: \texttt{ERROR}, \texttt{WARNING}, \texttt{INFO}, \texttt{DEBUG}, \texttt{DEBUG1}, \texttt{DEBUG2}, \texttt{DEBUG3}, \texttt{DEBUG4}
+\item[] \texttt{-d -{}-debug level} \hspace{2cm} One of the following debug levels: \texttt{ERROR}, \texttt{WARNING}, \texttt{INFO}, \texttt{DEBUG}, \texttt{DEBUG1}, \texttt{DEBUG2}, \texttt{DEBUG3}, \texttt{DEBUG4}
 
-\item[] \texttt{-t timer\_period} \hspace{2cm} Specifies the period in seconds between calls to Iwaki update.
+\item[] \texttt{-t -{}-timer timer\_period} \hspace{2cm} Specifies the period in seconds between calls to Iwaki update.
 
-\item[] \texttt{-l path/log\_file\_prefix} \hspace{2cm} If present, this option directs all the debug output to the file prefixed with \texttt{log\_file\_prefix}.
+\item[] \texttt{-l -{}-log path/log\_file\_prefix} \hspace{2cm} If present, this option directs all the debug output to the file prefixed with \texttt{log\_file\_prefix}.
 
-\item[] \texttt{-x} \hspace{2cm} If present, this option enables the text-based user interface displayed in the current terminal window.
+\item[] \texttt{-x -{}-text\_ui} \hspace{2cm} If present, this option enables the text-based user interface displayed in the current terminal window.
 
-\item[] \texttt{-p path} \hspace{2cm} Path to IM scripts directory. This directory should contain init file.
+\item[] \texttt{-p -{}-path path} \hspace{2cm} Path to IM scripts directory. This directory should contain init file.
 
-\item[] \texttt{-i init\_file} \hspace{2cm} If present, overrides the default init file name, initialize\_im.xml. 
+\item[] \texttt{-i -{}-init init\_file} \hspace{2cm} If present, overrides the default init file name, initialize\_im.xml. 
 
-\item[] \texttt{-s path to sound files} \hspace{2cm} Absolute path to the sound file directory.
+\item[] \texttt{-a -{}-atoms defaults\_file} \hspace{2cm} If present, overrides the default atoms file name, default\_atoms.xml. 
+
+\item[] \texttt{-s -{}-sounds path to sound files} \hspace{2cm} Absolute path to the sound file directory.
 
 \end{itemize}
 

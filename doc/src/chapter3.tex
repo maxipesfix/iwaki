@@ -141,3 +141,17 @@ Here is an action with 4 arguments:
 \end{lstlisting}
 
 \section{Default atoms file}
+
+
+Default atoms file specifies default values of atom slots, their types, and type constraints. 
+
+\lstset{language=XML}
+\begin{lstlisting}
+<atom>
+    <slot name="type" val="im"/>
+    <slot name="subtype" val="globals"/>
+    <slot name="q2u_how_are_you_handled" val="true" enum="true, false"/>
+</atom>
+\end{lstlisting}
+
+The listing above, for example, specifies an atom of type \texttt{im}, subtype \texttt{globals}, and a slot named \texttt{q2u\_how\_are\_you\_handled} of a default type \texttt{string}, that can assume values \texttt{true} and \texttt{false}. The off-line type checker that runs when the recipes are loaded will verify that the values associated with slot \texttt{q2u\_how\_are\_you\_handled} are always within the list specified by \texttt{enum} attribute, and will throw an error otherwise.

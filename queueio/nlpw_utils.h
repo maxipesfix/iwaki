@@ -127,7 +127,9 @@ inline std::list<std::string> splitIntoListRemoveWhitespace(const std::string &s
                         item.begin(), item.end(),
                         RemoveWhitespace()),
                     item.end() );
-        elems.push_back(item);
+        if (!item.empty()) {
+            elems.push_back(item); /* push only non-empty strings */
+        }
     }
     return elems;
 }
@@ -314,7 +316,23 @@ inline string getNearestFutureWeekdayNormalizedDate(string weekday) {
     }    
 }
 
+/* Grounded expression is the one that doesn't have unescaped special symbols for
+ * $-vars and @-functions */
 
+inline bool isGroundedExpression(string expr) {
+    return ((expr.find("$")==string::npos) && (expr.find("@")==string::npos));
+}
+
+inline string toString(list<string> listStr) {
+    string res;
+    for (list<string>::iterator listStr_it = listStr.begin();
+         listStr_it != listStr.end(); listStr_it++) {
+        string delim = (++listStr_it == listStr.end())?"":",";
+        listStr_it--;
+        res += *listStr_it + delim;
+    }
+    return res;
+}
 
 #endif // NLPW_UTILS_H
        

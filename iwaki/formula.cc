@@ -79,6 +79,10 @@ bool VarSlot::load(TiXmlElement* pElem)
   if (pElem->Attribute("type")) {
     this->type = pElem->Attribute("type");
   }
+
+  if (pElem->Attribute("enum")) {
+      this->enumerables = splitIntoListRemoveWhitespace(pElem->Attribute("enum"), ',');
+  }
 #ifdef USE_RE2
                              /* if relations involves RE matching, precompile regular
                               * expression, if there are no $-vars inside */
@@ -94,29 +98,71 @@ bool VarSlot::load(TiXmlElement* pElem)
       
       this->re_p = new RE2(val1, RE2::Quiet);
       if (!this->re_p->ok()) {
-          FILE_LOG(logERROR) << "Error parsing RE: " << this->val << ", which was evaluated into: "
-                             << val1;
+          FILE_LOG(logERROR) << "Error parsing RE: " << this->val <<
+              ", which was evaluated into: " << val1;
           FILE_LOG(logERROR) << this->re_p->error(); 
       }
       FILE_LOG(logDEBUG4) << "Parsed RE: " << this->val;
           //this->re_p = &re;
   }
 #endif
-  // cout << "Slot's name:"<< this->name << ", rel:"<< this->relation
-  //   << ", val:"<< this->val << ", var:" << this->var <<endl;
+  
+  FILE_LOG(logDEBUG4) << "Loaded slot's name:"<< this->name << ", rel:"<<
+      this->relation << ", val:"<< this->val << ", var:" << this->var <<
+      ", enum:" << toString(this->enumerables);
+  
+      /*
+       * Typecheck the values.
+       */
+  
+  if (!this->typeCheck()) {
+      FILE_LOG(logERROR) << "Typecheck failed when loading slot with name: " <<
+          this->name << ", rel:"<< this->relation << ", val:"<< this->val <<
+          ", var:" << this->var << ", eval:" <<
+          toString(this->enumerables) << ".";
+  }
+  
   return loadOkay;
+}
+
+bool VarSlot::typeCheck() {
+
+    bool res = true;
+
+        /*  _NO_VALUE_ or _NOT_FOUND_ is always OK. Also OK if its a RE relation or
+         *  it is not a grounded expression (contains $-var or @-function) */
+    if ((this->val=="_NO_VALUE_" || this->val=="_NOT_FOUND_") ||
+        isREFunction(this->relation) || !isGroundedExpression(this->val)) {
+        return true;
+    }
+        /* check enumerables */
+      FILE_LOG(logDEBUG) << "Enumerables:" << toString(this->enumerables);
+    if (!this->enumerables.empty()) {
+        bool exists = false;
+        for (list<string>::iterator listStr_it = this->enumerables.begin();
+         listStr_it != this->enumerables.end(); listStr_it++) {
+            if (*listStr_it == this->val) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {res = false;}
+    }
+    return res;
 }
 
 void VarSlot::print() {
     char buffer[80];
     sprintf(buffer, "          %-15.15s %-15.15s %-15.15s %-10.10s %-10.10s", this->name.c_str(), this->val.c_str(), this->var.c_str(), this->type.c_str(), this->relation.c_str());
     FILE_LOG(logDEBUG) << (string)buffer;
+    FILE_LOG(logDEBUG) << "enums: " << toString(this->enumerables);
 }
 
 void VarSlot::print(TLogLevel log_level) {
     char buffer[80];
     sprintf(buffer, "          %-15.15s %-15.15s %-15.15s %-10.10s %-10.10s", this->name.c_str(), this->val.c_str(), this->var.c_str(), this->type.c_str(), this->relation.c_str());
     FILE_LOG(log_level) << (string)buffer;
+    FILE_LOG(log_level) << "enums: " << toString(this->enumerables);
 }
 
 void VarSlot::printWithLabels() {
@@ -125,7 +171,9 @@ void VarSlot::printWithLabels() {
         "relation: " << this->relation << ", " <<       \
         "val: " << this->val << ", " <<                 \
         "var: " << this->var << "," <<                  \
-        "type: " << this->type;
+        "type: " << this->type <<
+        "enums: " << toString(this->enumerables);
+    
 }
 
 
@@ -426,8 +474,65 @@ bool Atom::load(TiXmlElement* pElem)
       return false;
     }
   }
+
   return loadOkay;
 }
+
+bool Atom::typeCheck() {
+    list<VarSlot>::iterator a_varslot = varslots.begin();
+    while (a_varslot!=varslots.end()) {
+        if (!a_varslot->typeCheck()) { return false; }
+        a_varslot++;
+    }
+    return true;
+}
+
+/*
+ * used to update the enum arg of the atom's slot
+ * */
+void Atom::updateFromDefaults(Atom &default_atom) {
+    list<VarSlot>::iterator a_varslot_it = this->varslots.begin();
+    while (a_varslot_it != this->varslots.end()) {
+        if (a_varslot_it->name != "this") {
+                /* there is no 'this' slot in the default atoms */
+            a_varslot_it->enumerables =
+                default_atom.getSlotEnum(a_varslot_it->name);
+            FILE_LOG(logDEBUG) << "updateFromDefaults: " <<
+                toString(a_varslot_it->enumerables);
+        }
+        a_varslot_it++;
+    }
+
+}
+
+/*
+ * used to update the enum arg of the atom's slot
+ * */
+void Atom::updateFromDefaults(Conjunction &default_atoms) {
+    Atom default_atom;
+    if (default_atoms.findAtom("type", this->readSlotVal("type"),
+                               "subtype", this->readSlotVal("subtype")) !=
+        default_atoms.atoms.end()) {
+        default_atom = *default_atoms.findAtom("type", this->readSlotVal("type"),
+                                               "subtype", this->readSlotVal("subtype"));
+    } else {
+        FILE_LOG(logERROR) << "Not found default atom with type: "
+                           << this->readSlotVal("type") << ", subtype: "
+                           << this->readSlotVal("subtype");
+        cout << "Not found default atom with type: " << this->readSlotVal("type")
+             << ", subtype: " << this->readSlotVal("subtype") << endl;
+        exit(1);
+    }
+    
+    FILE_LOG(logDEBUG) << "updating from defaults atom:";
+    this->print(logDEBUG);
+    this->updateFromDefaults(default_atom);
+    FILE_LOG(logDEBUG) << "updated from defaults atom:";
+    this->print(logDEBUG);
+}
+
+
+
 
 void Atom::print() {
     FILE_LOG(logDEBUG) << "       * atom with quantifier:" << this->quantifier;
@@ -543,7 +648,7 @@ bool Atom::unify(Atom &atom2, Conjunction &new_bindings, HowComplete howcomplete
 
 
 bool Atom::hasVar(string var1) {
-    for(list<VarSlot>::iterator varslot1=this->varslots.begin();        \
+    for(list<VarSlot>::iterator varslot1=this->varslots.begin();
         varslot1!=this->varslots.end(); varslot1++) {
         if (varslot1->var==var1) {
             return true;
@@ -559,7 +664,7 @@ bool Atom::hasVar(string var1) {
  * */
 
 VarSlot* Atom::getSlotByName(string slot_name) {
-    for(list<VarSlot>::iterator varslot1=this->varslots.begin();        \
+    for(list<VarSlot>::iterator varslot1=this->varslots.begin();
         varslot1!=this->varslots.end(); varslot1++) {
         if (varslot1->name==slot_name) {
             return &(*varslot1);
@@ -576,7 +681,7 @@ VarSlot* Atom::getSlotByName(string slot_name) {
  * */
 
 VarSlot* Atom::getSlotByVar(string slot_var) {
-    for(list<VarSlot>::iterator varslot1=this->varslots.begin();        \
+    for(list<VarSlot>::iterator varslot1=this->varslots.begin();
         varslot1!=this->varslots.end(); varslot1++) {
         if (varslot1->var==slot_var) {
             return &(*varslot1);
@@ -594,13 +699,13 @@ VarSlot* Atom::getSlotByVar(string slot_var) {
  * */
 
 string Atom::readSlotVal(string slot_name) {
-	for(list<VarSlot>::iterator varslot1=this->varslots.begin(); \
-		varslot1!=this->varslots.end(); varslot1++) {
-		if (varslot1->name==slot_name) {
-			return varslot1->val;
-			}
-		}
-	return "_NOT_FOUND_";
+    for(list<VarSlot>::iterator varslot1=this->varslots.begin(); 
+        varslot1!=this->varslots.end(); varslot1++) {
+        if (varslot1->name==slot_name) {
+            return varslot1->val;
+        }
+    }
+    return "_NOT_FOUND_";
 } 
 
 /** 
@@ -609,14 +714,36 @@ string Atom::readSlotVal(string slot_name) {
  * */
 
 string Atom::readSlotVar(string slot_name) {
-	for(list<VarSlot>::iterator varslot1=this->varslots.begin(); \
-		varslot1!=this->varslots.end(); varslot1++) {
-		if (varslot1->name==slot_name) {
-			return varslot1->var;
-			}
-		}
-	return "_NOT_FOUND_";
+    for(list<VarSlot>::iterator varslot1=this->varslots.begin();
+        varslot1!=this->varslots.end(); varslot1++) {
+        if (varslot1->name==slot_name) {
+            return varslot1->var;
+        }
+    }
+    return "_NOT_FOUND_";
 } 
+
+/** 
+ * Return the enumerables of a slot given the name
+ * 
+ * */
+
+list<string> &Atom::getSlotEnum(string slot_name) {
+    for(list<VarSlot>::iterator varslot1=this->varslots.begin();       
+        varslot1!=this->varslots.end(); varslot1++) {
+        if (varslot1->name==slot_name) {
+            return varslot1->enumerables;
+        } 
+    }
+    FILE_LOG(logERROR) << "Error: not found slot with name: " << slot_name
+                       << ", in atom with type: " << this->readSlotVal("type")
+                       << ", and subtype: " << this->readSlotVal("subtype");
+    cerr << "Error: not found slot with name: " << slot_name
+         << ", in atom with type: " << this->readSlotVal("type")
+         << ", and subtype: " << this->readSlotVal("subtype") << endl;
+    exit(1);
+}
+
 
 /**
  * Return the value of a slot given the var name
@@ -835,6 +962,23 @@ bool Conjunction::load(TiXmlElement* pElem) {
     return loadOkay;
 }
 
+
+bool Conjunction::typeCheck() {
+    std::vector<Atom>::iterator an_atom = this->atoms.begin();
+    while (an_atom != this->atoms.end()) {
+  	if (!an_atom->typeCheck()) { return false; }
+  	an_atom++;
+    }
+    return true;
+}
+
+void Conjunction::updateFromDefaults(Conjunction &default_atoms) {
+    std::vector<Atom>::iterator an_atom = this->atoms.begin();
+    while (an_atom != this->atoms.end()) {
+        an_atom->updateFromDefaults(default_atoms);
+  	an_atom++;
+    }
+}
 
 
 void Conjunction::print() {
@@ -1300,6 +1444,25 @@ bool Formula::load(TiXmlElement* pElem)
       this->disjuncts.push_back(conj);
   }
   return loadOkay;
+}
+
+
+bool Formula::typeCheck() {
+    vector<Conjunction>::iterator a_disjunct = disjuncts.begin();
+    while (a_disjunct!=disjuncts.end()) {
+  	if (!a_disjunct->typeCheck()) { return false;}
+  	a_disjunct++;
+    }
+    return true;
+}
+
+
+void Formula::updateFromDefaults(Conjunction &default_atoms) {
+    vector<Conjunction>::iterator a_disjunct = disjuncts.begin();
+    while (a_disjunct!=disjuncts.end()) {
+        a_disjunct->updateFromDefaults(default_atoms);
+  	a_disjunct++;
+    }
 }
 
 void Formula::print() {

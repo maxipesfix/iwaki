@@ -90,6 +90,7 @@ class VarSlot {
       relation("equal"), val(val), type("string"), unique_mask(unique_mask),
       re_p(NULL){}
     bool load(TiXmlElement* pElem);
+    bool typeCheck();
     void print();
     void print(TLogLevel log_level);
     void printWithLabels();
@@ -109,7 +110,9 @@ class VarSlot {
     string var;
     string type;
     bool unique_mask;
-    RE2 *re_p;                     /* pointer to a pre-compiled regular expression */
+    list<string> enumerables; /* used in a default atom definition to
+                         * specify the list of allowed values */
+    RE2 *re_p;          /* pointer to a pre-compiled regular expression */
 };
 
 #else
@@ -133,6 +136,7 @@ class VarSlot {
     VarSlot(string name, string val, bool unique_mask): name(name),
       relation("equal"), val(val), type("string"), unique_mask(unique_mask){}
     bool load(TiXmlElement* pElem);
+    bool typeCheck();
     void print();
     void print(TLogLevel log_level);
     void printWithLabels();
@@ -150,6 +154,11 @@ class VarSlot {
     string var;
     string type;
     bool unique_mask;
+    list<string> enumerables; /* used in a default atom definition to
+                                    * specify the list of allowed values. Checked
+                                    * against this spec in pre- post-conditions
+                                    * and assignments
+                                    * upon recipe loading, and during run-time */
 };
 #endif
 
@@ -158,6 +167,9 @@ class Atom {
         // default constructor
     Atom(): quantifier("exist"), toBeDeleted(NotYet) {}
     bool load(TiXmlElement* pElem);
+    bool typeCheck();
+    void updateFromDefaults(Conjunction &defaults_atoms);
+    void updateFromDefaults(Atom &defaults_atom);
     void print();
     void print(TLogLevel log_level);
     void printWithLabels();
@@ -169,6 +181,7 @@ class Atom {
     string readSlotVal(string slot_name);
     string readVarVal(string slot_var);
     string readSlotVar(string slot_name);
+    list<string> &getSlotEnum(string slot_name);
     void setSlotVal(string slot_name, string slot_val);
     void setSlotUniqueMask(string slot_name, bool mask_val);
     bool setSlotValByVar(string slot_var, string slot_val);
@@ -195,6 +208,8 @@ class Conjunction {
     void print();
     void print(TLogLevel log_level);
     bool load(TiXmlElement* pElem);
+    bool typeCheck();
+    void updateFromDefaults(Conjunction &defaults_atoms);
     Atom* findAtomByVar(string var1);
     bool unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings,
                              std::vector< Match > &mapping, HowComplete howcomplete);
@@ -225,6 +240,8 @@ class Formula {
     bool load(TiXmlElement* pElem);
     void print();
     void print(TLogLevel log_level);
+    bool typeCheck();
+    void updateFromDefaults(Conjunction &defaults_atoms);
     bool bindTypeandSubtype(Formula precondition, string recipe_name);
     Atom* findAtomByVar(string var1);
     void bindThis(Conjunction &lBindings, string &recipe_name);
@@ -381,6 +398,7 @@ class Recipe{
 
     bool load(TiXmlElement* pElem);
     void print();
+    bool typeCheck();
     bool bindTypeAndSubtype();
 
   public:
@@ -554,6 +572,7 @@ class InteractionManager{
     bool load_DefaultAtoms(string default_atom_filename);
     bool loadRecipeFile(string recipe_filename);
     bool loadActionFile(string recipe_filename);
+    bool typeCheckRecipes();
     void printRecipes();
     void printTriggerables();
     void setGlobals();

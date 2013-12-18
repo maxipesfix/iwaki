@@ -354,6 +354,7 @@ bool InteractionManager::load_init(string init_filename)
                 {
                     FILE_LOG(logERROR) << "Could not load recipe file: "
                                        << pText << ", skipping" << endl;
+                    loadOkay = false;
                 };
             }
         }
@@ -374,6 +375,7 @@ bool InteractionManager::load_init(string init_filename)
                 {
                     FILE_LOG(logERROR) << "Could not load acton file: "
                                        << pText << ", skipping" << endl;
+                    loadOkay = false;
                 };
             }
         }
@@ -490,6 +492,34 @@ bool InteractionManager::load_init(string init_filename)
     
     
     return loadOkay;
+}
+
+/* go through loaded recipes and update the enumerables slot in their atoms.
+ * Check that the grounded vals are present in enumerables.
+ */
+bool InteractionManager::typeCheckRecipes() {
+    bool res = true;
+    
+    FILE_LOG(logDEBUG) << "Typechecking recipes. Updating from defaults...";
+    for (std::map<string, Recipe>::iterator a_recipe = this->recipes.begin(); \
+         a_recipe != this->recipes.end(); a_recipe++) {
+            /* assigning enum slots to preconditions */
+            
+        FILE_LOG(logDEBUG) << "Updating from defaults atoms of recipe: " <<
+            a_recipe->first;
+        a_recipe->second.precondition.updateFromDefaults(this->default_atoms);
+    }
+    
+    FILE_LOG(logDEBUG) << "Typechecking recipes. Typechecking enum slots...";
+    for (std::map<string, Recipe>::iterator a_recipe = this->recipes.begin(); \
+         a_recipe != this->recipes.end(); a_recipe++) {
+        if (!a_recipe->second.typeCheck()) {
+            res = false;
+            FILE_LOG(logERROR) << "Typechecking failed for the recipe: " <<
+                a_recipe->first;
+        }
+    }
+    return res;
 }
 
 void InteractionManager::printRecipes() {
@@ -1190,6 +1220,18 @@ bool InteractionManager::initialize() {
         FILE_LOG(logERROR) << "Loading default atoms from the file failed.";
     	return false;
     }
+
+        /** typecheck
+         * 1. enum slot of default atoms may declare allowed values of
+         * enumerable types. Here we gonna assign enum vals to slots of atoms
+         * in recipes and typecheck the grounded  values of those slots
+         * 2. whatever more sophisticated typechecking we come up with. **/
+
+        /** load the default atom slots **/
+    if (!this->typeCheckRecipes()) {
+        FILE_LOG(logERROR) << "Typechecking recipes failed.";
+    	return false;
+    }   
     
         /** preprocess **/
     if (!this->preprocess()) {

@@ -659,6 +659,16 @@ void Recipe::print() {
 	FILE_LOG(logDEBUG) << "-----------------------------------------------";
 }
 
+/**
+ ** Typecheck recipe
+ **/
+bool Recipe::typeCheck() {
+	FILE_LOG(logDEBUG) << "Typechecking recipe: " << this->name;
+	if (!this->precondition.typeCheck()) { return false;}
+        return true;
+}
+
+
 
 
 /* add missing type and subtype to the formula atoms in goals, and assignposts

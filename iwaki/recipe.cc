@@ -508,6 +508,20 @@ void BodyElement::print() {
 }
 
 
+bool BodyElement::typeCheck() {
+    if (this->element_type == "goal" || this->element_type == "assignment") {
+        return this->formula.typeCheck();
+    } else { return true; }
+
+}
+
+void BodyElement::updateFromDefaults(Conjunction &default_atoms) {
+    if (this->element_type == "goal" || this->element_type == "assignment") {
+        this->formula.updateFromDefaults(default_atoms);
+    }
+}
+
+
 /********************************************/
 /* Body methods */
 /********************************************/
@@ -572,6 +586,29 @@ void Body::print() {
   	an_element->print();
   	an_element++;
   	}
+}
+
+
+bool Body::typeCheck() { 
+    vector<BodyElement>::iterator an_element = elements.begin();
+        // go through body elements and see if the time is up
+    FILE_LOG(logDEBUG4) << "Typechecking body of the recipe...";
+    while (an_element!=elements.end()) {
+        if (!an_element->typeCheck()) { return false; }
+        an_element++;
+  }
+    return true;
+}
+
+
+void Body::updateFromDefaults(Conjunction &default_atoms) { 
+    vector<BodyElement>::iterator an_element = elements.begin();
+        // go through body elements and see if the time is up
+    FILE_LOG(logDEBUG4) << "Updating from defaults body of the recipe...";
+    while (an_element!=elements.end()) {
+        an_element->updateFromDefaults(default_atoms);
+        an_element++;
+  }
 }
 
 
@@ -664,10 +701,22 @@ void Recipe::print() {
  **/
 bool Recipe::typeCheck() {
 	FILE_LOG(logDEBUG) << "Typechecking recipe: " << this->name;
-	if (!this->precondition.typeCheck()) { return false;}
+	if (!this->precondition.typeCheck() || !this->whilecondition.typeCheck() ||
+            !this->body.typeCheck() || !this->assignpost.typeCheck()) { return false; }
         return true;
 }
 
+
+/**
+ ** Update type constraints (enumerables) in recipe atoms using default atoms
+ **/
+void Recipe::updateFromDefaults(Conjunction &default_atoms) {
+    FILE_LOG(logDEBUG4) << "Updating from defaults recipe: " << this->name;
+    this->precondition.updateFromDefaults(default_atoms);
+    this->whilecondition.updateFromDefaults(default_atoms);
+    this->body.updateFromDefaults(default_atoms);
+    this->assignpost.updateFromDefaults(default_atoms);
+}
 
 
 
@@ -675,21 +724,35 @@ bool Recipe::typeCheck() {
  * based on the share vars with preconditions */
 bool Recipe::bindTypeAndSubtype() {
     bool res = true;
+
+    if (!this->whilecondition.bindTypeandSubtype(this->precondition,
+                                             this->name)) {
+        res = false;
+	FILE_LOG(logERROR) <<
+            "Failed to bind type and subtype of the whilecondition of recipe: "
+                           << this->name;
+    }
+    
     for (vector<BodyElement>::iterator element_it = this->body.elements.begin();
          element_it!=this->body.elements.end(); element_it++) {
-  	if (element_it->element_type == "goal") {
+  	if (element_it->element_type == "goal" ||
+            element_it->element_type == "assignment") {
                 /* fill missing type/subtype of formula atoms */
             if (!element_it->formula.bindTypeandSubtype(this->precondition,
                                                         this->name)) {
                 res = false;
+                FILE_LOG(logERROR) <<
+                    "Failed to bind type and subtype of the body of recipe: "
+                                   << this->name;
             }
         }
     }
-    
     if (!this->assignpost.bindTypeandSubtype(this->precondition,
                                              this->name)) {
         res = false;
+        FILE_LOG(logERROR) <<
+            "Failed to bind type and subtype of the assignpost of recipe: "
+                           << this->name;
     }
-    
     return res;
 }

@@ -339,6 +339,8 @@ class BodyElement {
         if_node_purged = "abort"; /* acceptable values are: abort, wait */
     }
     bool load(TiXmlElement* pElem);
+    bool typeCheck();
+    void updateFromDefaults(Conjunction &defaults_atoms);
     bool parseActionLevel2_preprocessRandom(TiXmlElement* pElem);
     void assignArgsToRandElements(Args &args);
     void assignReturnArgsToRandElements(Args &return_args);
@@ -384,6 +386,8 @@ class Body {
     Body() {}
     bool load(TiXmlElement* pElem);
     void print();
+    bool typeCheck();
+    void updateFromDefaults(Conjunction &defaults_atoms);
   public:
     string order;
     std::vector<BodyElement> elements;
@@ -400,6 +404,7 @@ class Recipe{
     void print();
     bool typeCheck();
     bool bindTypeAndSubtype();
+    void updateFromDefaults(Conjunction &defaults_atoms);
 
   public:
     string name;

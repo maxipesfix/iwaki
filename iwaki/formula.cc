@@ -136,7 +136,7 @@ bool VarSlot::typeCheck() {
         return true;
     }
         /* check enumerables */
-      FILE_LOG(logDEBUG) << "Enumerables:" << toString(this->enumerables);
+    FILE_LOG(logDEBUG) << "Enumerables:" << toString(this->enumerables);
     if (!this->enumerables.empty()) {
         bool exists = false;
         for (list<string>::iterator listStr_it = this->enumerables.begin();
@@ -146,7 +146,12 @@ bool VarSlot::typeCheck() {
                 break;
             }
         }
-        if (!exists) {res = false;}
+        if (!exists) {
+            res = false;
+            FILE_LOG(logERROR) << "Typechecking enumerables failed for varslot with name:"
+                               << this->name << ", value: " << this->val
+                               << ", enumerables: " << toString(this->enumerables);  
+        }
     }
     return res;
 }
@@ -481,7 +486,11 @@ bool Atom::load(TiXmlElement* pElem)
 bool Atom::typeCheck() {
     list<VarSlot>::iterator a_varslot = varslots.begin();
     while (a_varslot!=varslots.end()) {
-        if (!a_varslot->typeCheck()) { return false; }
+        if (!a_varslot->typeCheck()) {
+            FILE_LOG(logERROR) << "Typechecking enumerables failed for atom with type:"
+                               << this->readSlotVal("type") << ", subtype: "
+                               << this->readSlotVal("subtype");  
+            return false; }
         a_varslot++;
     }
     return true;

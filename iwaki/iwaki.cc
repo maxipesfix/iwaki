@@ -507,7 +507,7 @@ bool InteractionManager::typeCheckRecipes() {
             
         FILE_LOG(logDEBUG) << "Updating from defaults atoms of recipe: " <<
             a_recipe->first;
-        a_recipe->second.precondition.updateFromDefaults(this->default_atoms);
+        a_recipe->second.updateFromDefaults(this->default_atoms);       
     }
     
     FILE_LOG(logDEBUG) << "Typechecking recipes. Typechecking enum slots...";

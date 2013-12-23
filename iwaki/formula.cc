@@ -136,7 +136,7 @@ bool VarSlot::typeCheck() {
         return true;
     }
         /* check enumerables */
-    FILE_LOG(logDEBUG) << "Enumerables:" << toString(this->enumerables);
+    FILE_LOG(logDEBUG4) << "Enumerables:" << toString(this->enumerables);
     if (!this->enumerables.empty()) {
         bool exists = false;
         for (list<string>::iterator listStr_it = this->enumerables.begin();
@@ -160,14 +160,12 @@ void VarSlot::print() {
     char buffer[80];
     sprintf(buffer, "          %-15.15s %-15.15s %-15.15s %-10.10s %-10.10s", this->name.c_str(), this->val.c_str(), this->var.c_str(), this->type.c_str(), this->relation.c_str());
     FILE_LOG(logDEBUG) << (string)buffer;
-    FILE_LOG(logDEBUG) << "enums: " << toString(this->enumerables);
 }
 
 void VarSlot::print(TLogLevel log_level) {
     char buffer[80];
     sprintf(buffer, "          %-15.15s %-15.15s %-15.15s %-10.10s %-10.10s", this->name.c_str(), this->val.c_str(), this->var.c_str(), this->type.c_str(), this->relation.c_str());
     FILE_LOG(log_level) << (string)buffer;
-    FILE_LOG(log_level) << "enums: " << toString(this->enumerables);
 }
 
 void VarSlot::printWithLabels() {
@@ -506,7 +504,7 @@ void Atom::updateFromDefaults(Atom &default_atom) {
                 /* there is no 'this' slot in the default atoms */
             a_varslot_it->enumerables =
                 default_atom.getSlotEnum(a_varslot_it->name);
-            FILE_LOG(logDEBUG) << "updateFromDefaults: " <<
+            FILE_LOG(logDEBUG4) << "updateFromDefaults: " <<
                 toString(a_varslot_it->enumerables);
         }
         a_varslot_it++;
@@ -533,10 +531,10 @@ void Atom::updateFromDefaults(Conjunction &default_atoms) {
         exit(1);
     }
     
-    FILE_LOG(logDEBUG) << "updating from defaults atom:";
+    FILE_LOG(logDEBUG4) << "updating from defaults atom:";
     this->print(logDEBUG);
     this->updateFromDefaults(default_atom);
-    FILE_LOG(logDEBUG) << "updated from defaults atom:";
+    FILE_LOG(logDEBUG4) << "updated from defaults atom:";
     this->print(logDEBUG);
 }
 

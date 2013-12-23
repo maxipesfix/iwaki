@@ -2487,7 +2487,10 @@ bool InteractionManager::tryBackchainOnGoalWithRecipe(Recipe &recipe,
             if (!found) {
                 FILE_LOG(logERROR) << "Not found a match entry in mapping for\n"
                                    << "assignpost atom with 'this' = " << new_var;
-                return false;
+                    /*                return false;
+                     *                trying to allow for assignpost to have
+                     *                more atoms than the goal */
+                continue;
             }
                 /* got id1, read "this" var of id1-th atom from match_con_id of
                  * the goal. */

@@ -159,6 +159,8 @@ class VarSlot {
                                     * against this spec in pre- post-conditions
                                     * and assignments
                                     * upon recipe loading, and during run-time */
+    list<string> inPrecondForRecipes; /* a list of recipes for which this slot is
+                                       * in the preconditions */
 };
 #endif
 
@@ -398,7 +400,8 @@ class Recipe{
 
   public:
     //default constructor
-    Recipe(): priority(0), ifWhileconditionFailed("skip_to_end") {}
+    Recipe(): priority(0), ifWhileconditionFailed("skip_to_end"),
+        precondChanged(true) {}
 
     bool load(TiXmlElement* pElem);
     void print();
@@ -416,6 +419,8 @@ class Recipe{
     Body body;
     Conjunction bindings;
     string ifWhileconditionFailed;
+    bool precondChanged; /* flag indicating that the precondition atoms MAY have
+                          * changed since last check. */
 };
 
 /**

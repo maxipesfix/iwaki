@@ -1136,6 +1136,19 @@ void InteractionManager::preprocessBackchainables() {
  * - build lists of recipes to possibly correspond for each slot of default atoms
  * */
 bool InteractionManager::preprocess() {
+
+        /** typecheck
+         * 1. enum slot of default atoms may declare allowed values of
+         * enumerable types. Here we gonna assign enum vals to slots of atoms
+         * in recipes and typecheck the grounded  values of those slots
+         * 2. whatever more sophisticated typechecking we come up with. **/
+
+        /** load the default atom slots **/
+    if (!this->typeCheckRecipes()) {
+        FILE_LOG(logERROR) << "Typechecking recipes failed.";
+    	return false;
+    }   
+    
         /* build list of possible backchainable recipes for each goal */
     this->preprocessBackchainables();
     
@@ -1221,17 +1234,6 @@ bool InteractionManager::initialize() {
     	return false;
     }
 
-        /** typecheck
-         * 1. enum slot of default atoms may declare allowed values of
-         * enumerable types. Here we gonna assign enum vals to slots of atoms
-         * in recipes and typecheck the grounded  values of those slots
-         * 2. whatever more sophisticated typechecking we come up with. **/
-
-        /** load the default atom slots **/
-    if (!this->typeCheckRecipes()) {
-        FILE_LOG(logERROR) << "Typechecking recipes failed.";
-    	return false;
-    }   
     
         /** preprocess **/
     if (!this->preprocess()) {

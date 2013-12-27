@@ -112,6 +112,8 @@ class VarSlot {
     bool unique_mask;
     list<string> enumerables; /* used in a default atom definition to
                          * specify the list of allowed values */
+    list<string> inPrecondOfRecipes; /* a list of recipes for which this slot is
+                                       * in the preconditions */    
     RE2 *re_p;          /* pointer to a pre-compiled regular expression */
 };
 
@@ -159,7 +161,7 @@ class VarSlot {
                                     * against this spec in pre- post-conditions
                                     * and assignments
                                     * upon recipe loading, and during run-time */
-    list<string> inPrecondForRecipes; /* a list of recipes for which this slot is
+    list<string> inPrecondOfRecipes; /* a list of recipes for which this slot is
                                        * in the preconditions */
 };
 #endif
@@ -170,8 +172,12 @@ class Atom {
     Atom(): quantifier("exist"), toBeDeleted(NotYet) {}
     bool load(TiXmlElement* pElem);
     bool typeCheck();
-    void updateFromDefaults(Conjunction &defaults_atoms);
     void updateFromDefaults(Atom &defaults_atom);
+    void updateFromDefaults(Conjunction &defaults_atoms);
+    void createDefaultsToRecipesMap(string &recipe_name,
+                                    Atom &defaults_atom);
+    void createDefaultsToRecipesMap(string &recipe_name,
+                                    Conjunction &default_atoms);
     void print();
     void print(TLogLevel log_level);
     void printWithLabels();
@@ -212,6 +218,8 @@ class Conjunction {
     bool load(TiXmlElement* pElem);
     bool typeCheck();
     void updateFromDefaults(Conjunction &defaults_atoms);
+    void createDefaultsToRecipesMap(string &recipe_name,
+                                    Conjunction &default_atoms);
     Atom* findAtomByVar(string var1);
     bool unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings,
                              std::vector< Match > &mapping, HowComplete howcomplete);
@@ -244,6 +252,8 @@ class Formula {
     void print(TLogLevel log_level);
     bool typeCheck();
     void updateFromDefaults(Conjunction &defaults_atoms);
+    void createDefaultsToRecipesMap(string &recipe_name,
+                                    Conjunction &default_atoms);
     bool bindTypeandSubtype(Formula precondition, string recipe_name);
     Atom* findAtomByVar(string var1);
     void bindThis(Conjunction &lBindings, string &recipe_name);
@@ -408,6 +418,7 @@ class Recipe{
     bool typeCheck();
     bool bindTypeAndSubtype();
     void updateFromDefaults(Conjunction &defaults_atoms);
+    void createDefaultsToRecipePreconditionsMap(Conjunction &defaults_atoms);
 
   public:
     string name;
@@ -608,6 +619,7 @@ class InteractionManager{
     void insertRecipeIntoPrioritySortedList(std::list<string> &recipe_list,
                                             Recipe &aRecipe);
     void findBackchainablesForAGoal(BodyElement &element, std::list<string> &candidateRecipes, string goalRecipeName);
+    void preprocessDefaultsToPreconditionsMap();
     void preprocessBackchainables();
     bool preprocess();
     bool initialize();

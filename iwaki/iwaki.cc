@@ -1072,6 +1072,20 @@ void InteractionManager::findBackchainablesForAGoal(BodyElement &element, std::l
 
 }
 
+void InteractionManager:: preprocessDefaultsToPreconditionsMap() {
+    FILE_LOG(logDEBUG4) << "Preprocessing DefaultsPreconditionMaps...";
+    for (std::map<string, Recipe>::iterator a_recipe = this->recipes.begin(); \
+         a_recipe != this->recipes.end(); a_recipe++) {
+            /* assigning enum slots to preconditions */
+            
+        FILE_LOG(logDEBUG4) << "Preprocessing DefaultsPreconditionMap for recipe: " <<
+            a_recipe->first;
+        a_recipe->second.createDefaultsToRecipePreconditionsMap(this->default_atoms);       
+    }
+
+}
+
+
 /* Find potential backchainable recipes for each goal, based on the match
  * between goal and postcondition. Only the list of recipes and their content
  * should be necessary for this operation (nothing else from the IM object) */
@@ -1151,6 +1165,8 @@ bool InteractionManager::preprocess() {
     
         /* build list of possible backchainable recipes for each goal */
     this->preprocessBackchainables();
+
+    this->preprocessDefaultsToPreconditionsMap();
     
     return true;
 }
@@ -1234,7 +1250,6 @@ bool InteractionManager::initialize() {
     	return false;
     }
 
-    
         /** preprocess **/
     if (!this->preprocess()) {
         FILE_LOG(logERROR) << "Preprocessing failed.";

@@ -641,12 +641,14 @@ bool Recipe::load(TiXmlElement* pElem)
     //cout << "Level 1 tag: " << level1tag << endl;
     if (level1tag=="precondition") {
       if (!this->precondition.load(pLevel1Node)){
-        FILE_LOG(logERROR) << "Error: could not load precondition from recipe: " << this->name;
+        FILE_LOG(logERROR) << "Error: could not load precondition from recipe: " <<
+            this->name;
         return false;
       }
     } else if (level1tag=="whilecondition"){
         if (!this->whilecondition.load(pLevel1Node)){
-            FILE_LOG(logERROR) << "Error: could not load whilecondition from recipe: " << this->name;
+            FILE_LOG(logERROR) << "Error: could not load whilecondition from recipe: "
+                               << this->name;
             return false;
         } else {
                 /* set a recipe-level variable what to do if whilecondition fails */
@@ -656,17 +658,20 @@ bool Recipe::load(TiXmlElement* pElem)
         }
     } else if (level1tag=="assignwhile"){
       if (!this->assignwhile.load(pLevel1Node)){
-        FILE_LOG(logERROR) << "Error: could not load whilecondition from recipe: " << this->name;
+        FILE_LOG(logERROR) << "Error: could not load whilecondition from recipe: " <<
+            this->name;
         return false;
       }
     } else if (level1tag=="body"){
       if (!this->body.load(pLevel1Node)){
-        FILE_LOG(logERROR) << "Error: could not load body from recipe: " << this->name;
+        FILE_LOG(logERROR) << "Error: could not load body from recipe: " <<
+            this->name;
         return false;
       }
     } else if (level1tag=="assignpost"){
       if (!this->assignpost.load(pLevel1Node)){
-        FILE_LOG(logERROR) << "Error: could not load assignpost from recipe: " << this->name;
+        FILE_LOG(logERROR) << "Error: could not load assignpost from recipe: " <<
+            this->name;
         return false;
       }
     } else
@@ -697,13 +702,24 @@ void Recipe::print() {
 }
 
 /**
+ ** Creat the map from defaults to the recipe's preconditions by adding the recipe
+ ** to the default atom slot inPrecondOfRecipes list.
+ **/
+void Recipe::createDefaultsToRecipePreconditionsMap(Conjunction &default_atoms) {
+    FILE_LOG(logDEBUG4) << "Creating default-precondition map for recipe: " <<
+        this->name;
+    this->precondition.createDefaultsToRecipesMap(this->name, default_atoms);
+}
+
+
+/**
  ** Typecheck recipe
  **/
 bool Recipe::typeCheck() {
-	FILE_LOG(logDEBUG) << "Typechecking recipe: " << this->name;
-	if (!this->precondition.typeCheck() || !this->whilecondition.typeCheck() ||
-            !this->body.typeCheck() || !this->assignpost.typeCheck()) { return false; }
-        return true;
+    FILE_LOG(logDEBUG) << "Typechecking recipe: " << this->name;
+    if (!this->precondition.typeCheck() || !this->whilecondition.typeCheck() ||
+        !this->body.typeCheck() || !this->assignpost.typeCheck()) { return false; }
+    return true;
 }
 
 

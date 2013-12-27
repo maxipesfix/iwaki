@@ -532,13 +532,49 @@ void Atom::updateFromDefaults(Conjunction &default_atoms) {
     }
     
     FILE_LOG(logDEBUG4) << "updating from defaults atom:";
-    this->print(logDEBUG);
+    this->print(logDEBUG4);
     this->updateFromDefaults(default_atom);
     FILE_LOG(logDEBUG4) << "updated from defaults atom:";
-    this->print(logDEBUG);
+    this->print(logDEBUG4);
 }
 
 
+void Atom::createDefaultsToRecipesMap(string &recipe_name,
+                                      Atom &default_atom) {
+    list<VarSlot>::iterator a_varslot_it = this->varslots.begin();
+    while (a_varslot_it != this->varslots.end()) {
+        if (a_varslot_it->name != "this") {
+                /* there is no 'this' slot in the default atoms */
+                //TODO: default_atom.updateDefaultsToRecipesMap(recipe_name, a_varslot_it->name);
+            FILE_LOG(logDEBUG4) << "updated defaultsToRecipes map: " <<
+                toString(default_atom.getSlotByName(a_varslot_it->name)->inPrecondOfRecipes);
+        }
+        a_varslot_it++;
+    }
+
+}
+
+
+
+void Atom::createDefaultsToRecipesMap(string &recipe_name,
+                                      Conjunction &default_atoms) {
+    vector<Atom>::iterator default_atom_it;
+    if (default_atoms.findAtom("type", this->readSlotVal("type"),
+                               "subtype", this->readSlotVal("subtype")) !=
+        default_atoms.atoms.end()) {
+        default_atom_it = default_atoms.findAtom("type", this->readSlotVal("type"),
+                                               "subtype", this->readSlotVal("subtype"));
+    } else {
+        FILE_LOG(logERROR) << "Not found default atom with type: "
+                           << this->readSlotVal("type") << ", subtype: "
+                           << this->readSlotVal("subtype");
+        cout << "Not found default atom with type: " << this->readSlotVal("type")
+             << ", subtype: " << this->readSlotVal("subtype") << endl;
+        exit(1);
+    }
+    
+    this->createDefaultsToRecipesMap(recipe_name, *default_atom_it);
+}
 
 
 void Atom::print() {
@@ -982,11 +1018,19 @@ bool Conjunction::typeCheck() {
 void Conjunction::updateFromDefaults(Conjunction &default_atoms) {
     std::vector<Atom>::iterator an_atom = this->atoms.begin();
     while (an_atom != this->atoms.end()) {
-        an_atom->updateFromDefaults(default_atoms);
+            //an_atom->updateFromDefaults(default_atoms);
   	an_atom++;
     }
 }
 
+void Conjunction::createDefaultsToRecipesMap(string &recipe_name,
+                                                   Conjunction &default_atoms) {
+    std::vector<Atom>::iterator an_atom = this->atoms.begin();
+    while (an_atom != this->atoms.end()) {
+        an_atom->createDefaultsToRecipesMap(recipe_name, default_atoms);
+  	an_atom++;
+    }
+}
 
 void Conjunction::print() {
     FILE_LOG(logDEBUG) << "      Conjunction of length:" << this->atoms.size();
@@ -1471,6 +1515,17 @@ void Formula::updateFromDefaults(Conjunction &default_atoms) {
   	a_disjunct++;
     }
 }
+
+
+void Formula::createDefaultsToRecipesMap(string &recipe_name,
+                                         Conjunction &default_atoms) {
+    vector<Conjunction>::iterator a_disjunct = disjuncts.begin();
+    while (a_disjunct!=disjuncts.end()) {
+        a_disjunct->createDefaultsToRecipesMap(recipe_name, default_atoms);
+  	a_disjunct++;
+    }
+}
+
 
 void Formula::print() {
     vector<Conjunction>::iterator a_disjunct = disjuncts.begin();
@@ -2076,7 +2131,8 @@ Error: not found subtype in the following atom:";
  * exist for given type+subtype.
  * Returns false if a group has more ids1 than ids2
  * */
-bool Matching::addAtomToGroup(std::vector<Atom>::size_type id1, string &group_id, Conjunction &con2) {
+bool Matching::addAtomToGroup(std::vector<Atom>::size_type id1,
+                              string &group_id, Conjunction &con2) {
     if ( this->groups.count(group_id)==1 ) {
         
             /* group exists, add atom1 id to the indexes to match */

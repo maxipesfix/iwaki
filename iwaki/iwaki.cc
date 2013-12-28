@@ -58,14 +58,26 @@ void insertIntListSortedUnique(std::list<int> &aList, const int new_val) {
         val_it++;
     }
     if (val_it == aList.end()) {
-                                                    /* append to the end */
-        aList.insert(val_it, new_val);
+        aList.insert(val_it, new_val);             /* append to the end */
     } else if (*val_it != new_val) {
-                                                    /* insert before val_it */
-        aList.insert(val_it, new_val);
+        aList.insert(val_it, new_val);            /* insert before val_it */
     }
     
 }
+
+void insertStringListSortedUnique(std::list<string> &aList, const string &new_val) {
+    std::list<string>::iterator val_it = aList.begin();
+    while ((val_it != aList.end()) && (*val_it < new_val)) {
+        val_it++;
+    }
+    if (val_it == aList.end()) {
+        aList.insert(val_it, new_val);             /* append to the end */
+    } else if (*val_it != new_val) {
+        aList.insert(val_it, new_val);            /* insert before val_it */
+    }
+    
+}
+
 
 
 /********************************************/
@@ -1080,7 +1092,7 @@ void InteractionManager:: preprocessDefaultsToPreconditionsMap() {
             
         FILE_LOG(logDEBUG4) << "Preprocessing DefaultsPreconditionMap for recipe: " <<
             a_recipe->first;
-        a_recipe->second.createDefaultsToRecipePreconditionsMap(this->default_atoms);       
+        a_recipe->second.updateDefaultsToRecipePreconditionsMap(this->default_atoms);       
     }
 
 }

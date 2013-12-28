@@ -705,10 +705,10 @@ void Recipe::print() {
  ** Creat the map from defaults to the recipe's preconditions by adding the recipe
  ** to the default atom slot inPrecondOfRecipes list.
  **/
-void Recipe::createDefaultsToRecipePreconditionsMap(Conjunction &default_atoms) {
+void Recipe::updateDefaultsToRecipePreconditionsMap(Conjunction &default_atoms) {
     FILE_LOG(logDEBUG4) << "Creating default-precondition map for recipe: " <<
         this->name;
-    this->precondition.createDefaultsToRecipesMap(this->name, default_atoms);
+    this->precondition.updateDefaultsToRecipesMap(this->name, default_atoms);
 }
 
 

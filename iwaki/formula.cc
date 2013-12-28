@@ -539,13 +539,34 @@ void Atom::updateFromDefaults(Conjunction &default_atoms) {
 }
 
 
-void Atom::createDefaultsToRecipesMap(string &recipe_name,
+/* finds a varslot with the same name as varslot_name and add
+ * recipe name to its inPrecondOfRecipes list. */
+
+void Atom::updateDefaultsToRecipesMap(string &recipe_name,
+                                      string &varslot_name) {
+    list<VarSlot>::iterator a_varslot_it = this->varslots.begin();
+    while (a_varslot_it != this->varslots.end()) {
+        if (a_varslot_it->name == varslot_name) {
+            insertStringListSortedUnique(a_varslot_it->inPrecondOfRecipes,
+                                         recipe_name);
+            FILE_LOG(logDEBUG4) << "slot name: " << varslot_name <<
+                ", inPrecondOfRecipes: " <<
+                toString(a_varslot_it->inPrecondOfRecipes);
+        }
+        a_varslot_it++;
+    }
+
+}
+
+
+
+void Atom::updateDefaultsToRecipesMap(string &recipe_name,
                                       Atom &default_atom) {
     list<VarSlot>::iterator a_varslot_it = this->varslots.begin();
     while (a_varslot_it != this->varslots.end()) {
         if (a_varslot_it->name != "this") {
                 /* there is no 'this' slot in the default atoms */
-                //TODO: default_atom.updateDefaultsToRecipesMap(recipe_name, a_varslot_it->name);
+            default_atom.updateDefaultsToRecipesMap(recipe_name, a_varslot_it->name);
             FILE_LOG(logDEBUG4) << "updated defaultsToRecipes map: " <<
                 toString(default_atom.getSlotByName(a_varslot_it->name)->inPrecondOfRecipes);
         }
@@ -556,7 +577,7 @@ void Atom::createDefaultsToRecipesMap(string &recipe_name,
 
 
 
-void Atom::createDefaultsToRecipesMap(string &recipe_name,
+void Atom::updateDefaultsToRecipesMap(string &recipe_name,
                                       Conjunction &default_atoms) {
     vector<Atom>::iterator default_atom_it;
     if (default_atoms.findAtom("type", this->readSlotVal("type"),
@@ -573,7 +594,7 @@ void Atom::createDefaultsToRecipesMap(string &recipe_name,
         exit(1);
     }
     
-    this->createDefaultsToRecipesMap(recipe_name, *default_atom_it);
+    this->updateDefaultsToRecipesMap(recipe_name, *default_atom_it);
 }
 
 
@@ -1023,11 +1044,11 @@ void Conjunction::updateFromDefaults(Conjunction &default_atoms) {
     }
 }
 
-void Conjunction::createDefaultsToRecipesMap(string &recipe_name,
+void Conjunction::updateDefaultsToRecipesMap(string &recipe_name,
                                                    Conjunction &default_atoms) {
     std::vector<Atom>::iterator an_atom = this->atoms.begin();
     while (an_atom != this->atoms.end()) {
-        an_atom->createDefaultsToRecipesMap(recipe_name, default_atoms);
+        an_atom->updateDefaultsToRecipesMap(recipe_name, default_atoms);
   	an_atom++;
     }
 }
@@ -1517,11 +1538,11 @@ void Formula::updateFromDefaults(Conjunction &default_atoms) {
 }
 
 
-void Formula::createDefaultsToRecipesMap(string &recipe_name,
+void Formula::updateDefaultsToRecipesMap(string &recipe_name,
                                          Conjunction &default_atoms) {
     vector<Conjunction>::iterator a_disjunct = disjuncts.begin();
     while (a_disjunct!=disjuncts.end()) {
-        a_disjunct->createDefaultsToRecipesMap(recipe_name, default_atoms);
+        a_disjunct->updateDefaultsToRecipesMap(recipe_name, default_atoms);
   	a_disjunct++;
     }
 }

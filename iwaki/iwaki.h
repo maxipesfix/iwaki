@@ -56,7 +56,7 @@ enum HowComplete {Partial, Complete};
 enum WhenToDelete {NotYet, WhenNotUsed, Now};
 
 void insertIntListSortedUnique(std::list<int> &aList, const int value);
-
+void insertStringListSortedUnique(std::list<string> &aList, const string &value);
 
 class TriggerableRecord {
   public:
@@ -174,10 +174,12 @@ class Atom {
     bool typeCheck();
     void updateFromDefaults(Atom &defaults_atom);
     void updateFromDefaults(Conjunction &defaults_atoms);
-    void createDefaultsToRecipesMap(string &recipe_name,
+    void updateDefaultsToRecipesMap(string &recipe_name,
                                     Atom &defaults_atom);
-    void createDefaultsToRecipesMap(string &recipe_name,
+    void updateDefaultsToRecipesMap(string &recipe_name,
                                     Conjunction &default_atoms);
+    void updateDefaultsToRecipesMap(string &recipe_name,
+                                    string &varslot_name);
     void print();
     void print(TLogLevel log_level);
     void printWithLabels();
@@ -218,7 +220,7 @@ class Conjunction {
     bool load(TiXmlElement* pElem);
     bool typeCheck();
     void updateFromDefaults(Conjunction &defaults_atoms);
-    void createDefaultsToRecipesMap(string &recipe_name,
+    void updateDefaultsToRecipesMap(string &recipe_name,
                                     Conjunction &default_atoms);
     Atom* findAtomByVar(string var1);
     bool unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings,
@@ -252,7 +254,7 @@ class Formula {
     void print(TLogLevel log_level);
     bool typeCheck();
     void updateFromDefaults(Conjunction &defaults_atoms);
-    void createDefaultsToRecipesMap(string &recipe_name,
+    void updateDefaultsToRecipesMap(string &recipe_name,
                                     Conjunction &default_atoms);
     bool bindTypeandSubtype(Formula precondition, string recipe_name);
     Atom* findAtomByVar(string var1);
@@ -418,7 +420,7 @@ class Recipe{
     bool typeCheck();
     bool bindTypeAndSubtype();
     void updateFromDefaults(Conjunction &defaults_atoms);
-    void createDefaultsToRecipePreconditionsMap(Conjunction &defaults_atoms);
+    void updateDefaultsToRecipePreconditionsMap(Conjunction &defaults_atoms);
 
   public:
     string name;

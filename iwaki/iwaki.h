@@ -113,7 +113,8 @@ class VarSlot {
     list<string> enumerables; /* used in a default atom definition to
                          * specify the list of allowed values */
     list<string> inPrecondOfRecipes; /* a list of recipes for which this slot is
-                                       * in the preconditions */    
+                                       * in the preconditions */
+    bool updated;       /* updated since last tick */
     RE2 *re_p;          /* pointer to a pre-compiled regular expression */
 };
 
@@ -413,7 +414,7 @@ class Recipe{
   public:
     //default constructor
     Recipe(): priority(0), ifWhileconditionFailed("skip_to_end"),
-        precondChanged(true) {}
+        precondUpdated(true) {}
 
     bool load(TiXmlElement* pElem);
     void print();
@@ -432,8 +433,8 @@ class Recipe{
     Body body;
     Conjunction bindings;
     string ifWhileconditionFailed;
-    bool precondChanged; /* flag indicating that the precondition atoms MAY have
-                          * changed since last check. */
+    bool precondUpdated; /* flag indicating that the precondition atoms MAY have
+                          * been updated since last check. */
 };
 
 /**
@@ -462,7 +463,8 @@ class Node{
 
   public:
     Node(Recipe &recipe): node_id(node_counter), active_element(-1),
-        ae_action_id(-1), ae_status("_NO_VALUE_"), bodyElementDescriptionsHaveBeenSet(false),
+        ae_action_id(-1), ae_status("_NO_VALUE_"),
+        bodyElementDescriptionsHaveBeenSet(false),
         whileconditionFailed(false) {
         body = recipe.body;
         assignpost = recipe.assignpost;
@@ -480,7 +482,8 @@ class Node{
         string recipe_name;
         int node_id;                            /* a unique node id */
         int active_element;                     /* index of active body element */
-        int ae_action_id;                       /* unique action_id for an active element */
+        int ae_action_id;                       /* unique action_id for an active
+                                                 * element */
         string ae_status;                       /* status of the active element:
                                                  * pending, executing, completed */
         Conjunction bindings;
@@ -585,7 +588,8 @@ class History {
 class InteractionManager{
   public:
         // default constructor
-    InteractionManager(): pending_answer_action_id(0), user_counter(0), atom_counter(0), action_counter(0), timing_dump_period(10) { }
+    InteractionManager(): pending_answer_action_id(0), user_counter(0),
+        atom_counter(0), action_counter(0), timing_dump_period(10) { }
 
   public:
     string getRecipeDir();
@@ -615,26 +619,32 @@ class InteractionManager{
          * because they may need to access to the IM global variables */
 
 
-        /* IM: methods for plan tree transformations */
+        /** IM: methods for plan tree transformations */
     bool tryPushTriggerables();
     bool tryPushTriggerable(TriggerableRecord &a_trig);
+
+        /** preprocessing */
     void insertRecipeIntoPrioritySortedList(std::list<string> &recipe_list,
                                             Recipe &aRecipe);
-    void findBackchainablesForAGoal(BodyElement &element, std::list<string> &candidateRecipes, string goalRecipeName);
+    void findBackchainablesForAGoal(BodyElement &element, std::list<string>
+                                    &candidateRecipes, string goalRecipeName);
     void preprocessDefaultsToPreconditionsMap();
     void preprocessBackchainables();
     bool preprocess();
     bool initialize();
 
     /** atom binding transformations */
-    bool checkPreconditionGivenFormula(Formula aprecond, tree<Node>::iterator &parent, \
+    bool checkPreconditionGivenFormula(Formula aprecond, tree<Node>::iterator
+                                       &parent,
                                        Conjunction &new_bindings);
-    bool checkPreconditionGivenRecipe(string &name, tree<Node>::iterator &parent, \
+    bool checkPreconditionGivenRecipe(string &name, tree<Node>::iterator &parent,
                                       Conjunction &new_bindings);
-    void replaceAtomBinding(Atom &new_atom); /* completelet replace root of ptree bindings for the atom*/
+    void replaceAtomBinding(Atom &new_atom); /* completelet replace root of
+                                              * ptree bindings for the atom*/
     void pushAtomBinding(Atom &new_atom);
     void updateGlobalBindings();
-    bool updateAtomBinding(Atom &new_atom); /* update root of ptree bindings for the atom*/
+    bool updateAtomBinding(Atom &new_atom); /* update root of ptree bindings
+                                             * for the atom*/
     bool updateRootBindingAtomMatchingType(Atom &new_atom, bool create = false);
     bool updateRootBindingAtomMatchingTypeId(Atom &new_atom);
     bool updateRootBindingAtomMatchAnySlots(Atom &new_atom, string slot_name1);
@@ -642,7 +652,8 @@ class InteractionManager{
                                                std::list<string> &slotList);
     void updateRootBindingAtomMatchingUniqueMask(Atom &new_atom);
     void updateRootBindingFromInputQueue();
-    bool checkWhilecondition(tree<Node>::post_order_iterator &node, tree<Node>::iterator &parent);
+    bool checkWhilecondition(tree<Node>::post_order_iterator &node,
+                             tree<Node>::iterator &parent);
     void checkPruneWhileConditions();
     bool bindWhilecondition(Node &node);
     /** plan tree execution */
@@ -675,6 +686,10 @@ class InteractionManager{
     bool checkForGhostAtoms(Node &node);
     void printSettings();
     //void callbackInviteString(blackboardEntry<char*> &invite_str);
+
+    /* mark recipe precondUpdated as updated. */
+
+    void markRecipePrecondUpdated(list<string> &recipe_names);
 
   public:
     string init_file_name;

@@ -1084,9 +1084,25 @@ void InteractionManager::findBackchainablesForAGoal(BodyElement &element, std::l
 
 }
 
-void InteractionManager:: preprocessDefaultsToPreconditionsMap() {
+void InteractionManager::markRecipePrecondUpdated(list<string> &recipe_names) {
+
+    for (list<string>::iterator recipe_name_it = recipe_names.begin();
+         recipe_name_it != recipe_names.end(); recipe_name_it++) {
+        if (this->recipes.count(*recipe_name_it) == 0) {
+            FILE_LOG(logERROR) <<
+                "Updaing recipe preconditions failed: no recipe named: " <<
+                *recipe_name_it;
+        } else {
+            this->recipes[*recipe_name_it].precondUpdated = true;
+        }
+    }
+}
+
+
+
+void InteractionManager::preprocessDefaultsToPreconditionsMap() {
     FILE_LOG(logDEBUG4) << "Preprocessing DefaultsPreconditionMaps...";
-    for (std::map<string, Recipe>::iterator a_recipe = this->recipes.begin(); \
+    for (std::map<string, Recipe>::iterator a_recipe = this->recipes.begin();
          a_recipe != this->recipes.end(); a_recipe++) {
             /* assigning enum slots to preconditions */
             

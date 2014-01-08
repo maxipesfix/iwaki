@@ -74,21 +74,24 @@ class VarSlot {
   public:
     // default constructor
     VarSlot(): relation("equal"), val("_NO_VALUE_"), type("string"),
-      unique_mask(false), re_p(NULL){}
+        unique_mask(false), re_p(NULL), updated(true) {}
     VarSlot(string name, string val): name(name), relation("equal"), val(val),
-      type("string"), unique_mask(false), re_p(NULL){}
+        type("string"), unique_mask(false), re_p(NULL), updated(true) {}
     VarSlot(string name, const char *val): name(name), relation("equal"),
-      val((string)val), type("string"), unique_mask(false), re_p(NULL){}
+        val((string)val), type("string"), unique_mask(false), re_p(NULL),
+        updated(true) {}
     VarSlot(string name, int val): name(name), relation("="),
-      val(to_string(val)), type("number"), unique_mask(false), re_p(NULL){}
+        val(to_string(val)), type("number"), unique_mask(false), re_p(NULL),
+        updated(true) {}
     VarSlot(string name, double val): name(name), relation("="),
-      val(to_string(val)), type("number"), unique_mask(false), re_p(NULL){}
+        val(to_string(val)), type("number"), unique_mask(false), re_p(NULL),
+        updated(true) {}
     VarSlot(string name, bool val): name(name), relation("equal"),
-      val(val ? "true" : "false"), type("string"), unique_mask(false),
-      re_p(NULL){}
+        val(val ? "true" : "false"), type("string"), unique_mask(false),
+        re_p(NULL), updated(true) {}
     VarSlot(string name, string val, bool unique_mask): name(name),
-      relation("equal"), val(val), type("string"), unique_mask(unique_mask),
-      re_p(NULL){}
+        relation("equal"), val(val), type("string"), unique_mask(unique_mask),
+        re_p(NULL), updated(true) {}
     bool load(TiXmlElement* pElem);
     bool typeCheck();
     void print();
@@ -114,8 +117,8 @@ class VarSlot {
                          * specify the list of allowed values */
     list<string> inPrecondOfRecipes; /* a list of recipes for which this slot is
                                        * in the preconditions */
-    bool updated;       /* updated since last tick */
     RE2 *re_p;          /* pointer to a pre-compiled regular expression */
+    bool updated;
 };
 
 #else
@@ -123,21 +126,22 @@ class VarSlot {
 /* variable constraint binding */
 class VarSlot {
   public:
-    // default constructor
+        // default constructor
     VarSlot(): relation("equal"), val("_NO_VALUE_"), type("string"),
-      unique_mask(false){}
+        unique_mask(false), updated(true) {}
     VarSlot(string name, string val): name(name), relation("equal"), val(val),
-      type("string"), unique_mask(false){}
+        type("string"), unique_mask(false), updated(true) {}
     VarSlot(string name, const char *val): name(name), relation("equal"),
-      val((string)val), type("string"), unique_mask(false){}
+        val((string)val), type("string"), unique_mask(false), updated(true) {}
     VarSlot(string name, int val): name(name), relation("="),
-      val(to_string(val)), type("number"), unique_mask(false){}
+        val(to_string(val)), type("number"), unique_mask(false), updated(true) {}
     VarSlot(string name, double val): name(name), relation("="),
-      val(to_string(val)), type("number"), unique_mask(false){}
+        val(to_string(val)), type("number"), unique_mask(false), updated(true) {}
     VarSlot(string name, bool val): name(name), relation("equal"),
-      val(val ? "true" : "false"), type("string"), unique_mask(false){}
-    VarSlot(string name, string val, bool unique_mask): name(name),
-      relation("equal"), val(val), type("string"), unique_mask(unique_mask){}
+        val(val ? "true" : "false"), type("string"), unique_mask(false), updated(true) {}
+        VarSlot(string name, string val, bool unique_mask): name(name),
+            relation("equal"), val(val), type("string"), unique_mask(unique_mask),
+            updated(true) {}
     bool load(TiXmlElement* pElem);
     bool typeCheck();
     void print();
@@ -164,6 +168,7 @@ class VarSlot {
                                     * upon recipe loading, and during run-time */
     list<string> inPrecondOfRecipes; /* a list of recipes for which this slot is
                                        * in the preconditions */
+    bool updated;
 };
 #endif
 
@@ -194,6 +199,7 @@ class Atom {
     string readSlotVar(string slot_name);
     list<string> &getSlotEnum(string slot_name);
     void setSlotVal(string slot_name, string slot_val);
+    void setSlotVal(string slot_name, string slot_val, bool updated);
     void setSlotUniqueMask(string slot_name, bool mask_val);
     bool setSlotValByVar(string slot_var, string slot_val);
     void updateAtomValsOnly(Atom &atom2);
@@ -690,6 +696,7 @@ class InteractionManager{
     /* mark recipe precondUpdated as updated. */
 
     void markRecipePrecondUpdated(list<string> &recipe_names);
+    void givenAtomMarkRecipePrecondUpdated(Atom &atom);
 
   public:
     string init_file_name;
@@ -722,6 +729,8 @@ class InteractionManager{
     int timing_dump_counter;
     int timing_dump_period;
     double timer_period_microsec;
+    bool optimizedPreconditionCheck; /* do selective precondition check based on updated
+                                      * slota of global recipes or not */
 };
 
 #endif // IWAKI_H

@@ -1084,6 +1084,15 @@ void InteractionManager::findBackchainablesForAGoal(BodyElement &element, std::l
 
 }
 
+void InteractionManager::givenAtomMarkRecipePrecondUpdated(Atom &an_atom) {
+    for(list<VarSlot>::iterator a_varslot_it = an_atom.varslots.begin();
+        a_varslot_it != an_atom.varslots.end(); a_varslot_it++) {
+        if (a_varslot_it->updated) {
+            this->markRecipePrecondUpdated(a_varslot_it->inPrecondOfRecipes);
+        }
+    }
+}
+
 void InteractionManager::markRecipePrecondUpdated(list<string> &recipe_names) {
 
     for (list<string>::iterator recipe_name_it = recipe_names.begin();
@@ -1489,6 +1498,9 @@ bool InteractionManager::updateAtomBinding(Atom &new_atom)
     }
 
     matching_atom->updateAtom(new_atom);
+    if (this->optimizedPreconditionCheck) {
+        this->givenAtomMarkRecipePrecondUpdated(*matching_atom);
+    }
 
     #ifdef DEBUG
     FILE_LOG(logDEBUG4) <<  "Root bindings after UpdateAtomBinding:";
@@ -1515,37 +1527,44 @@ bool InteractionManager::updateRootBindingAtomMatchingType(Atom &new_atom, bool 
     root->bindings.print(logDEBUG4);
     #endif
     
-    vector<Atom>::iterator matching_atom = \
-        root->bindings.findAtom("type", new_atom.readSlotVal("type"),       \
+    vector<Atom>::iterator matching_atom =
+        root->bindings.findAtom("type", new_atom.readSlotVal("type"),
                                 "subtype", new_atom.readSlotVal("subtype"));
     if (matching_atom == root->bindings.atoms.end()) {
             /* no matching atom in the bindings */
         if (create) {
-            FILE_LOG(logDEBUG3) << \
+            FILE_LOG(logDEBUG3) << 
                 "No matching atom found in the bindings, creating new atom";
                 /* first, get a default atom of the require type and subtype,
                  * modify it's id to the new_atom's,
                  * push it on bindings, and then
                  * update bindings with the new_atom */
-            vector<Atom>::iterator default_atom_it =                      \
-                this->default_atoms.findAtom("type", new_atom.readSlotVal("type"), \
+            vector<Atom>::iterator default_atom_it =
+                this->default_atoms.findAtom("type", new_atom.readSlotVal("type"),
                                              "subtype", new_atom.readSlotVal("subtype"));
             if (default_atom_it ==  this->default_atoms.atoms.end()) {
-                FILE_LOG(logERROR) <<                                   \
-                    "No matching default atom found for type: " <<  new_atom.readSlotVal("type") \
-                                   << " subtype: " << new_atom.readSlotVal("subtype");
+                FILE_LOG(logERROR) <<
+                    "No matching default atom found for type: " <<
+                    new_atom.readSlotVal("type") <<
+                    " subtype: " << new_atom.readSlotVal("subtype");
                 return false;
             }
                 /* found default atom of the right type/subtype, modify id */
             Atom default_atom = *default_atom_it;
             this->pushAtomBinding(default_atom);
-            this->updateRootBindingAtomMatchingTypeId(new_atom);
+            this->updateRootBindingAtomMatchingType(new_atom);
+                // MM: changed this to matching with type. I don't
+                // understand how ID could be important here.
+                //this->updateRootBindingAtomMatchingTypeId(new_atom);
         } else {
             FILE_LOG(logDEBUG3) << "No matching atom found in the bindings, ignoring";
             return false;
         }
     } else {
         matching_atom->updateAtom(new_atom);
+        if (this->optimizedPreconditionCheck) {
+            this->givenAtomMarkRecipePrecondUpdated(*matching_atom);
+        }
     }
     
     #ifdef DEBUG
@@ -1603,6 +1622,9 @@ bool InteractionManager::updateRootBindingAtomMatchingTypeId(Atom &new_atom)
         this->updateRootBindingAtomMatchingTypeId(new_atom);
     } else {
         matching_atom->updateAtom(new_atom);
+        if (this->optimizedPreconditionCheck) {
+            this->givenAtomMarkRecipePrecondUpdated(*matching_atom);
+        }
     }
     #ifdef DEBUG
     FILE_LOG(logDEBUG4) <<  "Root bindings after updateRootBindingAtomMatchTypeId:";
@@ -1663,6 +1685,9 @@ bool InteractionManager::updateRootBindingAtomMatchAnySlots(Atom &new_atom, stri
         this->updateRootBindingAtomMatchAnySlots(new_atom, slot_name1);
     } else {
         matching_atom->updateAtom(new_atom);
+        if (this->optimizedPreconditionCheck) {
+            this->givenAtomMarkRecipePrecondUpdated(*matching_atom);
+        }
     }
 
     #ifdef DEBUG
@@ -1734,6 +1759,9 @@ bool InteractionManager::updateRootBindingAtomMatchingSlotList(Atom &new_atom,
             //this->updateRootBindingAtomMatchAnySlots(new_atom, slot_name1);
     } else {
         matching_atom->updateAtom(new_atom);
+        if (this->optimizedPreconditionCheck) {
+            this->givenAtomMarkRecipePrecondUpdated(*matching_atom);
+        }
     }
 
         //#ifdef DEBUG
@@ -1798,6 +1826,9 @@ void InteractionManager::updateRootBindingAtomMatchingUniqueMask(Atom &new_atom)
     } else {
             /* matching atom found in global bindings, update it */
         matching_atom_it->updateAtom(new_atom);
+        if (this->optimizedPreconditionCheck) {
+            this->givenAtomMarkRecipePrecondUpdated(*matching_atom_it);
+        }
     }
 
         //#ifdef DEBUG
@@ -2158,8 +2189,7 @@ void InteractionManager::executeNode(tree<Node>::post_order_iterator &node) {
 bool InteractionManager::executeAssignment(BodyElement &element1, Conjunction &bindings) {
     FILE_LOG(logDEBUG3) << "Attempting to execute assignment: " << element1.name;
 	/** get assignment formula and update root bindings with it
-	 * using current node bindings
-	 * for reference resolution */
+	 * using current node bindings for reference resolution */
     if (element1.formula.disjuncts.size()!=1) {
         FILE_LOG(logDEBUG3) << "IM error: assignment formula has " << \
             element1.formula.disjuncts.size() <<                        \
@@ -2330,7 +2360,7 @@ bool InteractionManager::processReturnArgs(Args &returnArgs, Conjunction &bindin
                     Conjunction *gBindings = this->getGlobalBindings();
                     vector<Atom>::iterator gAtom_it =           \
                         gBindings->findAtom("this", this_val);
-                    gAtom_it->setSlotVal(lSlot_p->name, arg_it->value);
+                    gAtom_it->setSlotVal(lSlot_p->name, arg_it->value, true);
                 }
             }
         }

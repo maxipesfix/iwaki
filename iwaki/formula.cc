@@ -268,7 +268,8 @@ bool VarSlot::evalStringRelation(string &val2, string &relation, string &type,
             /* OK, here all the $-vars can be resolved via new_bindings, do just this */
 
         string unit="_NO_VALUE_";
-        FILE_LOG(logDEBUG4) << "Evaluating slot val: " << this->val;
+        FILE_LOG(logDEBUG4) << "Evaluating slot val: " << this->val <<
+            ", slot name: " << this->name;
         val1 = exparser.eval(type, this->val, unit);
         
     } else {       
@@ -367,7 +368,8 @@ bool VarSlot::evalNumberRelation(string &val2, string &relation, string &type,
             /* OK, here all the $-vars can be resolved via new_bindings, do just this */
 
         string unit="_NO_VALUE_";
-        FILE_LOG(logDEBUG4) << "Evaluating slot val: " << this->val;
+        FILE_LOG(logDEBUG4) << "Evaluating slot val: " << this->val <<
+            ", slot name: " << this->name;
         val1 = exparser.eval(type, this->val, unit);
         
     } else {       
@@ -826,49 +828,76 @@ string Atom::readVarVal(string var_name) {
  * same as updateAtom() but does not add new slots found in atom2
  * */
 void Atom::updateAtomValsOnly(Atom &atom2) {
-	for(list<VarSlot>::iterator a_varslot2 = atom2.varslots.begin();\
-		a_varslot2 != atom2.varslots.end(); a_varslot2++) {
-		//bool found_slot = false;
-		for(list<VarSlot>::iterator a_varslot1 = this->varslots.begin();\
-		a_varslot1 != this->varslots.end(); a_varslot1++) {
-			if (a_varslot1->name == a_varslot2->name) {
-				a_varslot1->val = a_varslot2->val;
-                                    /* do not allow rewriting types */
-                                    //a_varslot1->type = a_varslot2->type;
-                                    //	found_slot = true;
-				break;
-				}
-			}
-
-                    /* do not add new slots */
-                    //if (!found_slot) {
-                    // /** slot name does not exist yet in this atom, add it */
-                    //this->varslots.push_back((*a_varslot2));	
-                    //		}
+    for(list<VarSlot>::iterator a_varslot2 = atom2.varslots.begin();
+        a_varslot2 != atom2.varslots.end(); a_varslot2++) {
+            //bool found_slot = false;
+        for(list<VarSlot>::iterator a_varslot1 = this->varslots.begin();
+            a_varslot1 != this->varslots.end(); a_varslot1++) {
+            if (a_varslot1->name == a_varslot2->name) {
+                a_varslot1->val = a_varslot2->val;
+                    /* do not allow rewriting types */
+                    //a_varslot1->type = a_varslot2->type;
+                    //	found_slot = true;
+                break;
+            }
         }
+        
+            /* do not add new slots */
+            //if (!found_slot) {
+            // /** slot name does not exist yet in this atom, add it */
+            //this->varslots.push_back((*a_varslot2));	
+            //		}
+    }
 }
 
 
 void Atom::updateAtom(Atom &atom2) {
-	for(list<VarSlot>::iterator a_varslot2 = atom2.varslots.begin();\
-		a_varslot2 != atom2.varslots.end(); a_varslot2++) {
-		bool found_slot = false;
-		for(list<VarSlot>::iterator a_varslot1 = this->varslots.begin();\
+    for(list<VarSlot>::iterator a_varslot2 = atom2.varslots.begin();
+        a_varslot2 != atom2.varslots.end(); a_varslot2++) {
+        bool found_slot = false;
+        for(list<VarSlot>::iterator a_varslot1 = this->varslots.begin();
+            a_varslot1 != this->varslots.end(); a_varslot1++) {
+            if (a_varslot1->name == a_varslot2->name) {
+                a_varslot1->val = a_varslot2->val;
+                a_varslot1->updated = true;              /* mark as updated */
+                    /* do not allow rewriting types */
+                    //a_varslot1->type = a_varslot2->type;
+                found_slot = true;
+                break;
+            }
+        }
+        if (!found_slot) {
+                /** slot name does not exist yet in this atom, add it */
+            a_varslot2->updated = true;                 /* mark as updated */ 
+            this->varslots.push_back((*a_varslot2));
+        }
+    }
+}
+
+
+/*
+ * a version of setSlotVal that sets updated flag on the varslot
+ * */
+void Atom::setSlotVal(string slot_name, string slot_val, bool updated) {
+	bool found_slot = false;
+	for(list<VarSlot>::iterator a_varslot1 = this->varslots.begin();\
 		a_varslot1 != this->varslots.end(); a_varslot1++) {
-			if (a_varslot1->name == a_varslot2->name) {
-				a_varslot1->val = a_varslot2->val;
-                                    /* do not allow rewriting types */
-                                    //a_varslot1->type = a_varslot2->type;
-				found_slot = true;
-				break;
-				}
-			}
-		if (!found_slot) {
-			/** slot name does not exist yet in this atom, add it */
-			this->varslots.push_back((*a_varslot2));	
+		if (a_varslot1->name == slot_name) {
+			a_varslot1->val = slot_val;
+                        a_varslot1->updated = true;
+			found_slot = true;
+			break;
 			}
 		}
+	if (!found_slot) {
+		/** slot name does not exist yet in this atom, add it */
+		VarSlot new_varslot;
+		new_varslot.name = slot_name;
+		new_varslot.val = slot_val;
+		this->varslots.push_back(new_varslot);	
+		}
 }
+
 
 void Atom::setSlotVal(string slot_name, string slot_val) {
 	bool found_slot = false;
@@ -926,7 +955,8 @@ void Atom::evalSlotVals(Conjunction &bindings) {
         a_varslot != this->varslots.end(); a_varslot++) {
         ExpressionParser exparser(bindings);
         string unit="_NO_VALUE_";
-        FILE_LOG(logDEBUG4) << "Evaluating slot val: " << a_varslot->val;
+        FILE_LOG(logDEBUG4) << "Evaluating slot val: " << a_varslot->val <<
+            ", slot name: " << a_varslot->name;
         a_varslot->val = exparser.eval(a_varslot->type, a_varslot->val, unit);
             /* returned unit is ignored here, should be standard unit */
     }

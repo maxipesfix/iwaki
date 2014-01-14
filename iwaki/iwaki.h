@@ -356,7 +356,7 @@ class BodyElement {
         {
             /* action status-dependent default behaviors*/
         if_completed = "skip_to_next";
-        if_aborted = "skip_to_end";
+        if_aborted = "skip_to_next";
         if_failed = "skip_to_next";
         if_timeout = "skip_to_next";
             /* recipe status-dependent default behaviors */

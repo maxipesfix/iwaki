@@ -717,7 +717,7 @@ bool InteractionManager::tryPushTriggerable(TriggerableRecord &a_trig) {
          (this->ptree.nodeChildNameCount(root, a_trig.name) <           \
           string_to_number((const std::string)a_trig.max_instances)))&&
         /* this line needs executed to assign the new_bindings */
-        (this->checkPreconditionGivenRecipe(a_trig.name, root, new_bindings))) {
+        (this->checkPreconditionGivenRecipe(a_trig.name, root, new_bindings, MATCH_GHOSTS))) {
 
             /**
              * make a new tree node, assign the new bindings to it
@@ -762,9 +762,10 @@ bool InteractionManager::tryPushTriggerable(TriggerableRecord &a_trig) {
 
 /* pass formula and copy it for cases when we may need to instatiate vals of some of
  * "this" slots */
-bool InteractionManager::checkPreconditionGivenFormula(Formula aprecond, \
-                                                       tree<Node>::iterator &parent_node, \
-                                                       Conjunction &new_bindings) {
+bool InteractionManager::checkPreconditionGivenFormula(Formula aprecond,
+                                                       tree<Node>::iterator &parent_node,
+                                                       Conjunction &new_bindings,
+                                                       bool match_ghosts) {
     
     this->updateGlobalBindings();
     Conjunction *gBindings = this->getGlobalBindings();
@@ -775,18 +776,19 @@ bool InteractionManager::checkPreconditionGivenFormula(Formula aprecond, \
          * NOTE that we disallow non-pure bindings, e.g. when both val and var are non empty
          * in preconditions, at least */
 
-        /* binding pure bindings and evluation of slot vals should be done
+        /* binding pure bindings and evaluation of slot vals should be done
          * as part of matching process -- for all possible match combinations */
 
-    return aprecond.unify(*gBindings, new_bindings);
+    return aprecond.unify(*gBindings, new_bindings, match_ghosts);
 }
 
 /** check if the recipe preconditions are satisfied,
  * perform binding of the recipe vars to the parent vars
  **/
-bool InteractionManager::checkPreconditionGivenRecipe(string &recipe_name, \
-                                                      tree<Node>::iterator &parent_node, \
-                                                      Conjunction &new_bindings) {
+bool InteractionManager::checkPreconditionGivenRecipe(string &recipe_name,
+                                                      tree<Node>::iterator &parent_node,
+                                                      Conjunction &new_bindings,
+                                                      bool match_ghosts) {
 
 	/** do the unification between recipe's preconditions and the
 	 * parent's (root for now) bindings */
@@ -806,7 +808,7 @@ bool InteractionManager::checkPreconditionGivenRecipe(string &recipe_name, \
          * since "this" val is copied from poscond to precond. */
 
     if (!checkPreconditionGivenFormula((recipe_it->second).precondition,
-                                       parent_node, new_bindings)) {
+                                       parent_node, new_bindings, match_ghosts)) {
             /** failed to unify */
         FILE_LOG(logDEBUG4) << "Preconditions failed for recipe: " << recipe_name;
         return false;
@@ -898,7 +900,7 @@ bool InteractionManager::checkWhilecondition(tree<Node>::post_order_iterator &no
     
 	/* do the unification between recipe's whileconditions and the
 	 * parent's bindings */
-    if (!node->whilecondition.unifyWithoutBinding(parent_node->bindings, node->bindings)) {
+    if (!node->whilecondition.unifyWithoutBinding(parent_node->bindings, node->bindings, false)) {
         FILE_LOG(logDEBUG4) << "Failed whilecondition for node with recipe: "
                             << node->recipe_name;
         return false;
@@ -1071,7 +1073,7 @@ void InteractionManager::findBackchainablesForAGoal(BodyElement &element, std::l
                                                     empty_binding,
                                                     mapping,
                                                     matched_con_id,
-                                                    Complete)) {
+                                                Complete, true)) { /* match_ghosts doesn't matter */
             insertRecipeIntoPrioritySortedList(element.backchainables, candidateRecipe);
 
             FILE_LOG(logDEBUG2) << "Postconditions of recipe "
@@ -2390,9 +2392,9 @@ bool InteractionManager::tryBackchainOnGoal(BodyElement &element1, tree<Node>::i
          * is satisfied by any of the user-defined backchainable recipes */
     goalFormula.bindThis(node->bindings, node->recipe_name);
     if ( (goalFormula.disjuncts.size() != 0)
+         && (!element1.forced)
          && goalFormula.unifyWithoutBinding(*(this->getGlobalBindings()),
-                                            node->bindings)
-         && (!element1.forced) ) {
+                                            node->bindings, element1.match_ghosts)) {
         FILE_LOG(logDEBUG3) << "Goal " << element1.name <<
             " is already satisfied by globals.";
         status = "completed";
@@ -2406,11 +2408,12 @@ bool InteractionManager::tryBackchainOnGoal(BodyElement &element1, tree<Node>::i
 
     if (true) {
             /* use backchaining preprocessing */
-        for (std::list<string>::iterator recipe_name_it = element1.backchainables.begin(); \
+        for (std::list<string>::iterator recipe_name_it =
+                 element1.backchainables.begin();
              recipe_name_it != element1.backchainables.end(); recipe_name_it++) {
             if (this->tryBackchainOnGoalWithRecipe(this->recipes[*recipe_name_it],
                                                    element1.name, goalFormula,
-                                                   goalFormula2, node)) {
+                                                   goalFormula2, node, element1.match_ghosts)) {
                     /* stop matching as soon as any recipe succeedes */
                 res=true;
                 status = "executing";
@@ -2420,11 +2423,11 @@ bool InteractionManager::tryBackchainOnGoal(BodyElement &element1, tree<Node>::i
         return res;
     } else {
             /* do not use backchaning preprocessing */
-        for (std::map<string, Recipe>::iterator recipe_it = this->recipes.begin(); \
+        for (std::map<string, Recipe>::iterator recipe_it = this->recipes.begin();
              recipe_it != this->recipes.end(); recipe_it++) {
             if (this->tryBackchainOnGoalWithRecipe(recipe_it->second,
                                                    element1.name, goalFormula,
-                                                   goalFormula2, node)) {
+                                                   goalFormula2, node, element1.match_ghosts)) {
                     /* stop matching as soon as any recipe succeedes */
                 res=true;
                 status = "executing";
@@ -2446,8 +2449,9 @@ bool InteractionManager::tryBackchainOnGoalWithRecipe(Recipe &recipe,
                                                       string &goalName,
                                                       Formula &goalFormula1,
                                                       Formula &goalFormula2,
-                                                      tree<Node>::iterator_base &node) {
-    FILE_LOG(logDEBUG4) << "Attempting to backchain on goal: " << goalName << \
+                                                      tree<Node>::iterator_base &node,
+                                                      bool match_ghosts) {
+    FILE_LOG(logDEBUG4) << "Attempting to backchain on goal: " << goalName <<
         "with recipe: " << recipe.name;
 	/*
          * check if post assignments satisfy the goal
@@ -2498,7 +2502,7 @@ bool InteractionManager::tryBackchainOnGoalWithRecipe(Recipe &recipe,
     if (!goalFormula2.unifyWithoutBinding((*conj_it),
                                           node->bindings,
                                           mapping,
-                                          matched_con_id, Complete)) {
+                                          matched_con_id, Complete, match_ghosts)) {
         FILE_LOG(logDEBUG4) << "Postconditions of recipe " << recipe.name << 
             " DO NOT satisfy goal " << goalName;
         return false;
@@ -2595,7 +2599,7 @@ bool InteractionManager::tryBackchainOnGoalWithRecipe(Recipe &recipe,
          * Check preconditions
          * */
     
-    if (this->checkPreconditionGivenFormula(precond, root, new_bindings)) {
+    if (this->checkPreconditionGivenFormula(precond, root, new_bindings, match_ghosts)) {
             /** make a new tree node, assign the new bindings to it**/
         FILE_LOG(logDEBUG3) << "Also preconditions of backchaining candidate recipe "
                             << recipe.name << " satisfy goal " << goalName;

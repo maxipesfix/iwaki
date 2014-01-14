@@ -672,7 +672,8 @@ string Atom::toBeDeleted2String() {
 /* new atom unification uses complete conjunction bindings to allow for
  * cross-referencing $-vars to other atoms within the conjunction.
  * if howcomplete == "partial" unification will not fail if $-vars are unresolved */
-bool Atom::unify(Atom &atom2, Conjunction &new_bindings, HowComplete howcomplete) {
+bool Atom::unify(Atom &atom2, Conjunction &new_bindings, HowComplete howcomplete,
+                 bool match_ghosts) {
     bool res = true;
     FILE_LOG(logDEBUG4) << "------Trying to unify atoms with complete flag == " << howcomplete;
     this->print(logDEBUG4);
@@ -682,7 +683,7 @@ bool Atom::unify(Atom &atom2, Conjunction &new_bindings, HowComplete howcomplete
 
         /* if atom2 has toBeDeleted anything but NotYet, fail to unify.
          * atom2 is normally from the global atoms */
-    if (atom2.toBeDeleted != NotYet) {
+    if ((atom2.toBeDeleted != NotYet) && !match_ghosts) {
         FILE_LOG(logDEBUG4) << "Failed to unify since atom2 toBeDeleted="
                             << atom2.toBeDeleted;
         return false;
@@ -1300,7 +1301,7 @@ void Conjunction::bindBindings(Conjunction &gBindings, Conjunction &new_bindings
  **/
 bool Conjunction::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings,
                                       std::vector< Match > &mapping,
-                                      HowComplete howcomplete) {
+                                      HowComplete howcomplete, bool match_ghosts) {
 
     
         /* prepare to generate matchings: place permanent locks
@@ -1327,7 +1328,7 @@ bool Conjunction::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindin
          * match of locked atoms first */
 
         /* passes 2 and 3: eval expressions and unify */
-    if (!this->unifyLockedAtoms(con2, new_bindings, aMatching, Partial)) {
+    if (!this->unifyLockedAtoms(con2, new_bindings, aMatching, Partial, match_ghosts)) {
             /* locked atoms were not unifiable. */
             /* move onto the next conjunction in the formula */
         return false;
@@ -1342,7 +1343,7 @@ bool Conjunction::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindin
             /* pass 1: extract bindings: no need here */
         
             /* passes 2 and 3: eval expressions and unify */
-        if (this->unifyLockedAtoms(con2, new_bindings, aMatching, howcomplete)) {
+        if (this->unifyLockedAtoms(con2, new_bindings, aMatching, howcomplete, match_ghosts)) {
                 /* all atoms in con1 got unified). */
             mapping = aMatching.mapping;
             return true;
@@ -1361,7 +1362,8 @@ bool Conjunction::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindin
  * Unify conjunction without binding (of a whilecondition, for example) and the conjunction 
  * root bindings, for example
  **/
-bool Conjunction::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings) {
+bool Conjunction::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings,
+                                      bool match_ghosts) {
 
     
         /* prepare to generate matchings: place permanent locks
@@ -1386,7 +1388,7 @@ bool Conjunction::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindin
         /* all atoms must be Locked, we require this of node.whilecondition */
 
         /* passes 2 and 3: eval expressions and unify */
-    return this->unifyLockedAtoms(con2, new_bindings, aMatching, Complete);
+    return this->unifyLockedAtoms(con2, new_bindings, aMatching, Complete, match_ghosts);
 }
 
 
@@ -1395,7 +1397,7 @@ bool Conjunction::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindin
  * Unify conjunction (of a precondition, for example) and the conjunction 
  * root bindings, for example
  **/
-bool Conjunction::unify(Conjunction &con2, Conjunction &new_bindings) {
+bool Conjunction::unify(Conjunction &con2, Conjunction &new_bindings, bool match_ghosts) {
            
         /* create locked matching and locked bindings
          * and check if it's unifiable so far.
@@ -1430,7 +1432,7 @@ bool Conjunction::unify(Conjunction &con2, Conjunction &new_bindings) {
     FILE_LOG(logDEBUG4) << "End of bounded bindings.";
     
         /* passes 2 and 3: eval expressions and unify */
-    if (!this->unifyLockedAtoms(con2, new_bindings, aMatching, Partial)) {
+    if (!this->unifyLockedAtoms(con2, new_bindings, aMatching, Partial, match_ghosts)) {
             /* locked atoms were not unifiable. */
             /* move onto the next conjunction in the formula */
         return false;
@@ -1452,7 +1454,7 @@ bool Conjunction::unify(Conjunction &con2, Conjunction &new_bindings) {
         FILE_LOG(logDEBUG4) << "End of bounded bindings.";
         
             /* passes 2 and 3: eval expressions and unify */
-        if (this->unifyLockedAtoms(con2, new_bindings, aMatching, Complete)) {
+        if (this->unifyLockedAtoms(con2, new_bindings, aMatching, Complete, match_ghosts)) {
                 /* all atoms in con1 got unified). */
             return true;
         }
@@ -1472,7 +1474,7 @@ bool Conjunction::unify(Conjunction &con2, Conjunction &new_bindings) {
  * unresolved vars will not affect unification.
  * if howcomplete = "full" all vars must be resolved. */
 bool Conjunction::unifyLockedAtoms(Conjunction &con2, Conjunction &new_bindings,
-                                   Matching &aMatching, HowComplete howcomplete) {
+                                   Matching &aMatching, HowComplete howcomplete, bool match_ghosts) {
 
 
         /* there will be a few passes:
@@ -1488,7 +1490,7 @@ bool Conjunction::unifyLockedAtoms(Conjunction &con2, Conjunction &new_bindings,
             /* do the unification between locked atoms only */
         if (( aMatch_it->match_type == Locked )&&
             ( !this->atoms[aMatch_it->id1].unify(
-                  con2.atoms[aMatch_it->id2], new_bindings, howcomplete))) {
+                  con2.atoms[aMatch_it->id2], new_bindings, howcomplete, match_ghosts))) {
             return false;
         }
     }
@@ -1710,7 +1712,7 @@ void Formula::bindThis(Conjunction &lBindings, string &recipe_name) {
  **/
 bool Formula::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings,
                                   std::vector< Match > &mapping, int &matched_con_id,
-                                  HowComplete howcomplete) {
+                                  HowComplete howcomplete, bool match_ghosts) {
     bool unified = true; /* empty formula unifies with everything */
     matched_con_id = -1; /* empty formula's matched_con_id = -1 */
 	
@@ -1733,7 +1735,7 @@ bool Formula::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings,
         con1 != this->disjuncts.end(); con1++) {
         matched_con_id++;
 
-        if (con1->unifyWithoutBinding(con2, new_bindings, mapping, howcomplete)) { 
+        if (con1->unifyWithoutBinding(con2, new_bindings, mapping, howcomplete, match_ghosts)) { 
             unified = true;
             break;
         } else {
@@ -1750,7 +1752,7 @@ bool Formula::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings,
  * Unify formula (of a whileconditions) and the conjunction of old bindings
  * (of a parent node, or global root bindings, for example)
  **/
-bool Formula::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings) {
+bool Formula::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings, bool match_ghosts) {
     bool unified = true; /** empty formula unifies with everything */
 	
 	/** iterate through conjunctions of the formula 
@@ -1771,7 +1773,7 @@ bool Formula::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings) 
     for(vector<Conjunction>::iterator con1=this->disjuncts.begin();       \
         con1 != this->disjuncts.end(); con1++) {
 
-        if (con1->unifyWithoutBinding(con2, new_bindings)) {
+        if (con1->unifyWithoutBinding(con2, new_bindings, match_ghosts)) {
             unified = true;
             break;
         } else {
@@ -1786,7 +1788,7 @@ bool Formula::unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings) 
  * Unify formula (of a precond) and the conjunction of old bindings
  * (of a parent node, or global root bindings, for example)
  **/
-bool Formula::unify(Conjunction &con2, Conjunction &new_bindings) {
+bool Formula::unify(Conjunction &con2, Conjunction &new_bindings, bool match_ghosts) {
     bool unified = true; /** empty formula unifies with everything */
 	
 	/** iterate through conjunctions of the formula 
@@ -1807,7 +1809,7 @@ bool Formula::unify(Conjunction &con2, Conjunction &new_bindings) {
     for(vector<Conjunction>::iterator con1=this->disjuncts.begin();       \
         con1 != this->disjuncts.end(); con1++) {
 
-        if (con1->unify(con2, new_bindings)) {
+        if (con1->unify(con2, new_bindings, match_ghosts)) {
             unified = true;
             break;
         } else {

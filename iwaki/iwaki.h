@@ -43,6 +43,8 @@
 
 #define ABORT_ACTION_NAME "abort_action"
 
+#define MATCH_GHOSTS false
+
 class Conjunction;
 class InteractionManager;
 class ExpressionParser;
@@ -190,7 +192,7 @@ class Atom {
     void print(TLogLevel log_level);
     void printWithLabels();
     string toBeDeleted2String();
-    bool unify(Atom &atom2, Conjunction &new_bindings, HowComplete howcomplete); 
+    bool unify(Atom &atom2, Conjunction &new_bindings, HowComplete howcomplete, bool match_ghosts); 
     bool hasVar(string var);
     VarSlot* getSlotByName(string slot_name);
     VarSlot* getSlotByVar(string slot_var);
@@ -231,11 +233,12 @@ class Conjunction {
                                     Conjunction &default_atoms);
     Atom* findAtomByVar(string var1);
     bool unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings,
-                             std::vector< Match > &mapping, HowComplete howcomplete);
-    bool unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings);
-    bool unify(Conjunction &bindings2, Conjunction &new_bindings);
+                             std::vector< Match > &mapping, HowComplete howcomplete,
+                             bool match_ghosts);
+    bool unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings, bool match_ghosts);
+    bool unify(Conjunction &bindings2, Conjunction &new_bindings, bool match_ghosts);
     bool unifyLockedAtoms(Conjunction &con2, Conjunction &new_bindings,
-                          Matching &initMatching, HowComplete howcomplete);
+                          Matching &initMatching, HowComplete howcomplete, bool match_ghosts);
     void updateBinding(Conjunction &gBindings);
     void updateBinding(Conjunction &gBindings, const int node_id);
     void bindBindings(Conjunction &gBindings, Conjunction &new_bindings, Matching &aMatching);
@@ -268,9 +271,9 @@ class Formula {
     void bindThis(Conjunction &lBindings, string &recipe_name);
     bool unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings,
                              std::vector< Match > &mapping, int &matched_con_id,
-                             HowComplete howcomplete);
-    bool unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings);
-    bool unify(Conjunction &parent_bindings, Conjunction &new_bindings);
+                             HowComplete howcomplete, bool match_ghosts);
+    bool unifyWithoutBinding(Conjunction &con2, Conjunction &new_bindings, bool match_ghosts);
+    bool unify(Conjunction &parent_bindings, Conjunction &new_bindings, bool match_ghosts);
     void evalSlotVals();
   public:
     std::vector<Conjunction> disjuncts;
@@ -345,7 +348,7 @@ class Matching {
 class BodyElement {
   public:
         // default constructor
-    BodyElement(): forced(false),
+    BodyElement(): forced(false), match_ghosts(false),
         chosen_outcome(-1), unique_within(0), random(false),
         pXmlElement(NULL),
         timeout(DEFAULT_ACTION_TIMEOUT),
@@ -375,6 +378,7 @@ class BodyElement {
     string name; /* name if action */
     string recipe_name; /* recipe names or 'any' */
     bool forced; /* forced backchaining even if the goal is true */
+    bool match_ghosts; /* allow backchainable recipe match atoms marked for deletion */
     Formula formula; /* goal or assignment*/
     string actor; /* who does the action */
     string action_space; /* which namespace to search action name in */
@@ -385,7 +389,8 @@ class BodyElement {
     std::vector< double > element_probs;
     int chosen_outcome;
     int unique_within; /* radius of the neighbourhood without repetitions */
-    bool random; /* is there a random block inside? (reparse each execution with coin tosses) */
+    bool random; /* is there a random block inside? (reparse each execution
+                  * with coin tosses) */
     TiXmlElement* pXmlElement; /* copy of the body element in case it's random */ 
     string if_completed;
     string if_aborted;
@@ -642,9 +647,11 @@ class InteractionManager{
     /** atom binding transformations */
     bool checkPreconditionGivenFormula(Formula aprecond, tree<Node>::iterator
                                        &parent,
-                                       Conjunction &new_bindings);
+                                       Conjunction &new_bindings,
+                                       bool match_ghosts);
     bool checkPreconditionGivenRecipe(string &name, tree<Node>::iterator &parent,
-                                      Conjunction &new_bindings);
+                                      Conjunction &new_bindings,
+                                      bool match_ghosts);
     void replaceAtomBinding(Atom &new_atom); /* completelet replace root of
                                               * ptree bindings for the atom*/
     void pushAtomBinding(Atom &new_atom);
@@ -681,7 +688,8 @@ class InteractionManager{
     bool tryBackchainOnGoalWithRecipe(Recipe &recipe, string &goalName,
                                       Formula &goalFormula1,
                                       Formula &goalFormula2,
-                                      tree<Node>::iterator_base &node);
+                                      tree<Node>::iterator_base &node,
+                                      bool match_ghosts);
     void tryBackchain();
     /** task execution */
     bool dispatchAction(BodyElement &element1, Conjunction &bindings,

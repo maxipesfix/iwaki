@@ -460,19 +460,32 @@ bool BodyElement::load(TiXmlElement* pElem)
     if (pElem->Attribute("recipe_name")) {
       this->recipe_name = pElem->Attribute("recipe_name");
     }
+    
     /* force backchaining even if goal is true */
     if (pElem->Attribute("forced")) {
-        string forced = pElem->Attribute("forced"); /* because need to cast this as string
-                                                     * before comparing with strings */
+        string forced = pElem->Attribute("forced"); /* need to cast as string
+                                                     * before comparing to strings */
         if (forced == "true") {
             this->forced = true;
         } else { 
             this->forced = false;
         }
     }
+
+    /* allow backchainable recipes match ghost atoms */
+    if (pElem->Attribute("match_ghosts")) {
+        string match_ghosts = pElem->Attribute("match_ghosts"); 
+        if (match_ghosts == "true") {
+            this->match_ghosts = true;
+        } else { 
+            this->match_ghosts = false;
+        }
+    }
+    
     
     if (!this->formula.load(pElem)){
-      FILE_LOG(logERROR) << "Error: could not load the formula in goal: " << this->name;
+      FILE_LOG(logERROR) << "Error: could not load the formula in goal: " <<
+          this->name;
       return false;
     }
     //cout << "Goal name:"<< this->name << ", initiator:" << this->initiator

@@ -348,7 +348,7 @@ class Matching {
 class BodyElement {
   public:
         // default constructor
-    BodyElement(): forced(false), match_ghosts(false),
+    BodyElement(): forced(false), match_ghosts(true),
         chosen_outcome(-1), unique_within(0), random(false),
         pXmlElement(NULL),
         timeout(DEFAULT_ACTION_TIMEOUT),

@@ -25,7 +25,8 @@ A manual can be found in the PROJECTDIR/doc directory.
 
 ### PREREQUISITES on Linux or Mac OS X
 
-* RE2 regular expression library: http://code.google.com/p/re2/
+* RE2 regular expression library: http://code.google.com/p/re2/ 
+  * make testinstall throws a "symbols not found" error on OSX, but that's OK.
 * Additionally, to run the Soundboard app, you will need to install 
   * ncurses 
   * on Linux, gstreamer (on ubuntu it is the package `gstreamer0.10-tools`).

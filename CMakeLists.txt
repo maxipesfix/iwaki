@@ -18,7 +18,7 @@ endif()
 # exclude RE2 from MinGW installation
 if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(RE2_LIBRARY "/usr/local/lib/libre2.a")
-	set(RE2_INCLUDE_PATH "/usr/local/include/re2")
+	set(RE2_INCLUDE_PATH "/usr/local/include")
 	find_package (Threads)
 endif()
 
